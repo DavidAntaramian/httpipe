@@ -6,7 +6,7 @@ defmodule HTTPlaster.Request do
   @typedoc """
   A specifier for the HTTP method
 
-  The standard `GET`, `POST`, `PUT`, `DELETE`, HEAD`, `OPTIONS`, and `PATCH` methods
+  The standard `GET`, `POST`, `PUT`, `DELETE`, `HEAD`, `OPTIONS`, and `PATCH` methods
   should always be supported by HTTPlaster adapters. The specification also
   allows for non-standard methods to be passed as atoms, and it is advantageous
   for adapters to support these non-standard methods should clients need to connect
@@ -15,16 +15,16 @@ defmodule HTTPlaster.Request do
   @type http_method :: :get | :post | :put | :delete | :head | :options | :patch | atom
 
   @typedoc """
-  Specifies a version of HTTP to use. The version should be specified as a t:String.t/0.
+  Specifies a version of HTTP to use. The version should be specified as a `t:String.t/0`.
 
   Currently, HTTPlaster only knows how to support HTTP 1.1 transactions, however,
   HTTP 2 is planned.
   """
-  @type http_version :: "1.1" 
+  @type http_version :: String.t
 
   @typedoc """
-  The body of a request must always be given as a t:String.t/0, `nil`, or
-  t:body_encoding/0.
+  The body of a request must always be given as a `String.t`, `nil`, or
+  `body_encoding`.
 
 
   In the event that the body is `nil`, the adapter _should not_ send a
@@ -39,12 +39,19 @@ defmodule HTTPlaster.Request do
 
   @type duplicate_options :: :replace_existing | :prefer_existing | :duplicates_ok
 
-  defstruct method: :get,
-            body: nil,
-            headers: [],
-            http_version: "1.1" 
-            
-  @spec add_header(t, String.t, String.t, duplicate_options) :: t
+  @type t :: %__MODULE__{
+               method: http_method,
+               http_version: http_version,
+               headers: headers,
+               body: body,
+             }
 
-  def add_header(request, header, value, duplication_option \\ :duplicates_ok)
+  defstruct method: :get,
+            http_version: "1.1",
+            headers: [],
+            body: nil
+
+            #@spec add_header(t, String.t, String.t, duplicate_options) :: t
+
+            #def add_header(request, header, value, duplication_option \\ :duplicates_ok)
 end
