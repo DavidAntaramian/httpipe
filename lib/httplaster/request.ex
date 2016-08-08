@@ -1,7 +1,14 @@
 defmodule HTTPlaster.Request do
-  @moduledoc """
-  
+  @moduledoc ~S"""
+  An HTTP request that will be sent to the server
+
+  Note: The functions in this module will typically take an `HTTPlaster.Conn`
+  as their first parameter and operate on the request struct located under the
+  `:request` key of the conn. It will then return a `HTTPlaster.Conn` with
+  an updated `:request` key.
   """
+
+  alias HTTPlaster.Conn
 
   @typedoc """
   A specifier for the HTTP method
@@ -14,11 +21,11 @@ defmodule HTTPlaster.Request do
   """
   @type http_method :: :get | :post | :put | :delete | :head | :options | :patch | atom
 
-  @typedoc """
-  Specifies a version of HTTP to use. The version should be specified as a `t:String.t/0`.
+  @typedoc ~S"""
+  Specifies a version of HTTP to use. The version should be specified as a `String.t`.
 
   Currently, HTTPlaster only knows how to support HTTP 1.1 transactions, however,
-  HTTP 2 is planned.
+  HTTP 2 is a future possibility.
   """
   @type http_version :: String.t
 
@@ -35,23 +42,42 @@ defmodule HTTPlaster.Request do
 
   @type body_encoding :: {:file, String.t} | {:form, Keyword.t}
 
-  @type headers :: Keyword.t
+  @type headers :: map()
 
   @type duplicate_options :: :replace_existing | :prefer_existing | :duplicates_ok
 
   @type t :: %__MODULE__{
                method: http_method,
                http_version: http_version,
+               url: String.t,
                headers: headers,
                body: body,
              }
 
   defstruct method: :get,
+            url: nil,
             http_version: "1.1",
-            headers: [],
+            headers: %{},
             body: nil
 
-            #@spec add_header(t, String.t, String.t, duplicate_options) :: t
+  @spec add_header(Conn.t, String.t, String.t, duplicate_options) :: Conn.t
+  def add_header(conn, header, value, duplication_option \\ :duplicates_ok)
 
-            #def add_header(request, header, value, duplication_option \\ :duplicates_ok)
+  def add_header(conn, header, value, :replace_existing) do
+    headers = conn.request.headers
+
+    Map.put(headers, header, value)
+
+    %{conn | request: %{ conn.request | headers: headers}}
+  end
+
+  @spec put_method(Conn.t, http_method) :: Conn.t
+  def put_method(conn, method) do
+    %{conn | request: %{ method: method}}
+  end
+
+  @spec put_url(Conn.t, String.t) :: Conn.t
+  def put_url(conn, url) do
+    %{conn | request: %{ url: url}}
+  end
 end

@@ -27,7 +27,10 @@ defmodule HTTPlaster.Mixfile do
   end
 
   def application() do
-    [applications: [:logger]]
+    [
+      env: [httplaster: [adapter: HTTPlaster.Adapters.Unimplemented]],
+      applications: [:logger]
+    ]
   end
 
   defp docs() do
