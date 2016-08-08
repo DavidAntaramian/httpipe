@@ -5,7 +5,7 @@ defmodule HTTPlaster.Conn do
 
   """
 
-  @default_adapter Application.get_env(:httplaster, :adapter)
+  @default_adapter Application.get_env(:httplaster, :adapter, HTTPlaster.Adapters.Unimplemented)
 
   alias HTTPlaster.{Request, Response}
 
