@@ -5,9 +5,8 @@ defmodule HTTPlaster.Conn do
 
   """
 
-  @default_adapter Application.get_env(:httplaster, :adapter, HTTPlaster.Adapters.Unimplemented)
-
   alias HTTPlaster.{Request, Response}
+  require Logger
 
   @type status :: :unexecuted | :executed
 
@@ -29,14 +28,12 @@ defmodule HTTPlaster.Conn do
   @doc """
   """
   @spec execute(t) :: t
-  def execute(%__MODULE__{request: r, adapter: :default, adapter_options: o}) do
-    @default_adapter.execute_request(r.method, r.url, r.body, r.headers, o)
-  end
-
-  # If the adapter has changed from the default, use :erlang.apply instead
-  # to fulfill the request
-  def execute(%__MODULE__{request: r, adapter: m, adapter_options: o}) do
-    :erlang.apply(m, :execute_request, [r.method, r.url, r.body, r.headers, o])
+  def execute(%__MODULE__{request: r, adapter: a, adapter_options: o}) do
+    url = prepare_url(r.url, r.params)
+    adapter = get_adapter(a)
+    Logger.debug("Adapter set to #{inspect adapter}")
+    Logger.debug("Preparing #{inspect r.method} request to #{url}")
+    adapter.execute_request(r.method, url, r.body, r.headers, o)
   end
 
   @doc """
@@ -51,5 +48,22 @@ defmodule HTTPlaster.Conn do
       {:error, {exception, meta}} ->
         raise exception, meta
     end
+  end
+
+  defp get_adapter(:default) do
+    Application.get_env(:httplaster, :adapter, HTTPlaster.Adapters.Unimplemented)
+  end
+
+  defp get_adapter(adapter), do: adapter
+
+  @spec prepare_url(Request.url, Request.params) :: String.t
+  def prepare_url(base_url, params) do
+    p = Enum.flat_map(params, fn 
+          {key, values} when is_list(values) -> Enum.map(values, &({key, &1}))
+          val -> [val]
+        end)
+        |> URI.encode_query()
+
+    "#{base_url}?#{p}"
   end
 end
