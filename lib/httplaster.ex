@@ -8,10 +8,10 @@ defmodule HTTPlaster do
   defdelegate execute!(conn), to: Conn
   defdelegate put_url(conn, url), to: Request
   defdelegate put_method(conn, method), to: Request
-  defdelegate put_header(conn, header, value), to: Request
-  defdelegate put_header(conn, header, value, duplicate_option), to: Request
-  defdelegate put_param(conn, param_name, value), to: Request
-  defdelegate put_param(conn, param_name, value, duplicate_option), to: Request
+  defdelegate add_header(conn, header, value), to: Request
+  defdelegate add_header(conn, header, value, duplicate_option), to: Request
+  defdelegate add_param(conn, param_name, value), to: Request
+  defdelegate add_param(conn, param_name, value, duplicate_option), to: Request
 
   @doc ~S"""
   Performs an HTTP `DELETE` reqeust on the given resource. 
@@ -68,7 +68,6 @@ defmodule HTTPlaster do
   @spec options(String.t, Keyword.t | Request.headers, Keyword.t) :: Conn.t
   def options(url, headers \\ %{}, options \\ []), do: request(:options, url, nil, headers, options)
 
-
   @doc ~S"""
   Identical to `options/3` but raises an error if the request could not be
   completed successfully.
@@ -81,7 +80,6 @@ defmodule HTTPlaster do
   """
   @spec patch(String.t, Request.body, Keyword.t | Request.headers, Keyword.t) :: Conn.t
   def patch(url, body, headers \\ %{}, options \\ []), do: request(:patch, url, body, headers, options)
-
 
   @doc ~S"""
   Identical to `patch/4` but raises an error if the request could not be
@@ -132,10 +130,9 @@ defmodule HTTPlaster do
     |> Conn.execute!()
   end
 
-  # build_conn_from_function(Request.method, String.t, Request.body, Request.headers, Keyword.t) :: Conn.t
-  #
   # Helper function that builds a Conn from one of the ease-of-use
   # functions.
+  @spec build_conn_from_function(Request.method, String.t, Request.body, Request.headers, Keyword.t) :: Conn.t
   defp build_conn_from_function(method, url, body, headers, options) do
     %Conn{}
     |> Request.put_method(method)

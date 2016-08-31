@@ -29,10 +29,9 @@ defmodule HTTPlaster.Request do
   """
   @type http_version :: String.t
 
-  @typedoc """
+  @typedoc ~S"""
   The body of a request must always be given as a `String.t`, `nil`, or
   `body_encoding`.
-
 
   In the event that the body is `nil`, the adapter _should not_ send a
   body payload. An empty string (`""`) should not be treated the same
@@ -40,9 +39,30 @@ defmodule HTTPlaster.Request do
   """
   @type body :: nil | String.t | body_encoding
 
+  @typedoc ~S"""
+  The body encoding specifies a specific way to encode the body
+  prior to sending it to the server.
+
+  ## Sending Files
+  
+  The `{:file, filename}` option  will cause the file located at `:file` to
+  be sent as the body of the request.
+
+  ## Form-Encoding
+  
+  The `{:form, parameters}` option will cause the parameters (encoded as keyword lists)
+  to be sent to be transformed into a `form-urlencoded` value before being
+  sent as the body of the request.
+  """
   @type body_encoding :: {:file, String.t} | {:form, Keyword.t}
 
-  @type headers :: map()
+  @typedoc ~S"""
+  Headers are stored in a map array of header name (in lower case)
+  as a binary to the value as a binary.
+  
+  For more information, see the documentation for `add_header/4`.
+  """
+  @type headers :: %{required(String.t) => String.t}
 
   @type params :: map()
 
@@ -64,12 +84,64 @@ defmodule HTTPlaster.Request do
             params: %{},
             body: nil
 
-  @spec put_header(Conn.t, String.t, String.t, duplicate_options) :: Conn.t
-  def put_header(conn, header, value, duplication_option \\ :duplicates_ok)
+  @doc """
+  Adds a header to the request
 
-  def put_header(conn, header, value, :replace_existing) do
+  ## Casing
+
+  Header names are case-insensitive: they may be passed to this function in any
+  case; however, in order to aid in de-duplication, header names will be stored
+  in lower case.
+
+  ## Duplicate Headers
+
+  Following the guidance of [RFC 2612 4.2](https://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.2),
+  duplicate headers are accomodated by flattening them into a comma-separated
+  list. This is the default behavior. For example,
+
+  ```elixir
+  %HTTPlaster.Conn{}
+  |> HTTPlaster.Request.add_header("Accept-Encoding", "gzip")
+  |> HTTPlaster.Request.add_header("Accept-Encoding", "deflate")
+  ```
+
+  will be flattened to the following header:
+
+  ```text
+  Accept-Encoding: gzip, deflate
+  ```
+
+  However, this behavior can be changed by specifying a different behavior
+  for duplicates as the final parameter. If `replace_existing` is passed,
+  the new value will always replace the existing value. If `prefer_existing`
+  is passed, the header will only be updated if there is no existing value.
+  """
+  @spec add_header(Conn.t, String.t, String.t, duplicate_options) :: Conn.t
+  def add_header(conn, header_name, header_value, duplication_option \\ :duplicates_ok)
+
+  def add_header(conn, header_name, header_value, :duplicates_ok) do
+    name = String.downcase(header_name)
     headers = conn.request.headers
-              |> Map.put(header, value)
+              |> Map.get_and_update(name, fn
+                 nil -> header_value
+                 existing -> "#{existing}, #{header_value}"
+              end)
+
+    %Conn{conn | request: %__MODULE__{ conn.request | headers: headers}}
+  end
+
+  def add_header(conn, header_name, header_value, :prefer_existing) do
+    name = String.downcase(header_name)
+    headers = conn.request.headers
+              |> Map.put_new(name, header_value)
+
+    %Conn{conn | request: %__MODULE__{ conn.request | headers: headers}}
+  end
+
+  def add_header(conn, header_name, header_value, :replace_existing) do
+    name = String.downcase(header_name)
+    headers = conn.request.headers
+              |> Map.put(name, header_value)
 
     %Conn{conn | request: %__MODULE__{ conn.request | headers: headers}}
   end
@@ -79,16 +151,38 @@ defmodule HTTPlaster.Request do
     %Conn{conn | request: %__MODULE__{ method: method}}
   end
 
-  @spec put_param(Conn.t, String.t, String.t, duplicate_options) :: Conn.t
-  def put_param(conn, param_name, value, duplication_option \\ :replace_existing)
+  @spec add_param(Conn.t, String.t, String.t, duplicate_options) :: Conn.t
+  def add_param(conn, param_name, value, duplication_option \\ :replace_existing)
 
-  def put_param(conn, param_name, value, :replace_existing) do
+  def add_param(conn, param_name, value, :replace_existing) do
     params = conn.request.params
              |> Map.put(param_name, value)
 
     %Conn{conn | request: %__MODULE__{ conn.request | params: params}}
   end
 
+  @doc """
+  """
+  @spec put_authentication_basic(Conn.t, String.t, String.t) :: Conn.t
+  def put_authentication_basic(conn, username, password) do
+    "#{username}:#{password}"
+    |> Base.encode64(case: :lower)
+
+  end
+
+  @doc """
+  Sets the URL for the resource to operate on.
+
+  The URL should include the scheme (`http://` or `https://`) as well
+  as the fully qualified domain name, and the request path for the
+  resource. If necessary, also include the port.
+
+  ## Basic Authentication
+  
+  If you need to use HTTP Basic authentication, *do not* include the
+  username and password as part of the URL. Instead, please use the
+  `put_authentication_basic/3` function.
+  """
   @spec put_url(Conn.t, String.t) :: Conn.t
   def put_url(conn, url) do
     %Conn{conn | request: %__MODULE__{ conn.request | url: url}}
