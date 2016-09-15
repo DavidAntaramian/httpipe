@@ -2,13 +2,11 @@ defmodule HTTPlaster.Request do
   @moduledoc ~S"""
   An HTTP request that will be sent to the server
 
-  Note: The functions in this module will typically take an `HTTPlaster.Conn`
-  as their first parameter and operate on the request struct located under the
-  `:request` key of the conn. It will then return a `HTTPlaster.Conn` with
-  an updated `:request` key.
+  Note: The functions in this module will typically take an `HTTPlaster.Request` struct
+  as their first parameter and return an updated struct. Under most circumstances,
+  you will want to use the functions defined in `HTTPlaster.Conn` which take `Conn`
+  structs and update internal `Request` structs.
   """
-
-  alias HTTPlaster.Conn
 
   @typedoc """
   A specifier for the HTTP method
@@ -100,9 +98,9 @@ defmodule HTTPlaster.Request do
   list. This is the default behavior. For example,
 
   ```elixir
-  %HTTPlaster.Conn{}
-  |> HTTPlaster.Request.add_header("Accept-Encoding", "gzip")
-  |> HTTPlaster.Request.add_header("Accept-Encoding", "deflate")
+  %HTTPlaster.Request{}
+  |> Request.add_header("Accept-Encoding", "gzip")
+  |> Request.add_header("Accept-Encoding", "deflate")
   ```
 
   will be flattened to the following header:
@@ -116,60 +114,58 @@ defmodule HTTPlaster.Request do
   the new value will always replace the existing value. If `prefer_existing`
   is passed, the header will only be updated if there is no existing value.
   """
-  @spec add_header(Conn.t, String.t, String.t, duplicate_options) :: Conn.t
-  def add_header(conn, header_name, header_value, duplication_option \\ :duplicates_ok)
+  @spec add_header(t, String.t, String.t, duplicate_options) :: t
+  def add_header(request, header_name, header_value, duplication_option \\ :duplicates_ok)
 
-  def add_header(conn, header_name, header_value, :duplicates_ok) do
+  def add_header(request, header_name, header_value, :duplicates_ok) do
     name = String.downcase(header_name)
-    headers = conn.request.headers
+    headers = request.headers
               |> Map.get_and_update(name, fn
                  nil -> header_value
                  existing -> "#{existing}, #{header_value}"
               end)
 
-    %Conn{conn | request: %__MODULE__{ conn.request | headers: headers}}
+    %__MODULE__{request | headers: headers}
   end
 
-  def add_header(conn, header_name, header_value, :prefer_existing) do
+  def add_header(request, header_name, header_value, :prefer_existing) do
     name = String.downcase(header_name)
-    headers = conn.request.headers
+    headers = request.headers
               |> Map.put_new(name, header_value)
 
-    %Conn{conn | request: %__MODULE__{ conn.request | headers: headers}}
+    %__MODULE__{ request | headers: headers}
   end
 
-  def add_header(conn, header_name, header_value, :replace_existing) do
+  def add_header(request, header_name, header_value, :replace_existing) do
     name = String.downcase(header_name)
-    headers = conn.request.headers
+    headers = request.headers
               |> Map.put(name, header_value)
 
-    %Conn{conn | request: %__MODULE__{ conn.request | headers: headers}}
+    %__MODULE__{ request | headers: headers}
   end
 
-  @spec put_headers(Conn.t, headers) :: Conn.t
-  def put_headers(conn, headers) do
-    %Conn{conn | request: %__MODULE__{ conn.request | headers: headers}}
+  @spec put_headers(t, headers) :: t
+  def put_headers(request, headers) do
+    %__MODULE__{ request | headers: headers}
   end
 
-  @spec put_method(Conn.t, http_method) :: Conn.t
-  def put_method(conn, method) do
-    %Conn{conn | request: %__MODULE__{ method: method}}
+  @spec put_method(t, http_method) :: t
+  def put_method(request, method) do
+    %__MODULE__{ request | method: method}
   end
 
-  @spec add_param(Conn.t, String.t, String.t, duplicate_options) :: Conn.t
-  def add_param(conn, param_name, value, duplication_option \\ :replace_existing)
+  @spec add_param(t, String.t, String.t, duplicate_options) :: t
+  def add_param(request, param_name, value, duplication_option \\ :replace_existing)
 
-  def add_param(conn, param_name, value, :replace_existing) do
-    params = conn.request.params
+  def add_param(request, param_name, value, :replace_existing) do
+    params = request.params
              |> Map.put(param_name, value)
 
-    %Conn{conn | request: %__MODULE__{ conn.request | params: params}}
+    %__MODULE__{ request | params: params}
   end
 
-  @doc """
-  """
-  @spec put_authentication_basic(Conn.t, String.t, String.t) :: Conn.t
-  def put_authentication_basic(conn, username, password) do
+  @spec put_authentication_basic(t, String.t, String.t) :: t
+  def put_authentication_basic(request, username, password) do
     "#{username}:#{password}"
     |> Base.encode64(case: :lower)
 
@@ -188,8 +184,8 @@ defmodule HTTPlaster.Request do
   username and password as part of the URL. Instead, please use the
   `put_authentication_basic/3` function.
   """
-  @spec put_url(Conn.t, String.t) :: Conn.t
-  def put_url(conn, url) do
-    %Conn{conn | request: %__MODULE__{ conn.request | url: url}}
+  @spec put_url(t, String.t) :: t
+  def put_url(request, url) do
+    %__MODULE__{ request | url: url}
   end
 end

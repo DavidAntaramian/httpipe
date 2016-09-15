@@ -69,6 +69,21 @@ defmodule HTTPlaster.Conn do
     %{conn | adapter_options: options}
   end
 
+  @spec put_req_method(t, Request.http_method) :: t
+  def put_req_method(%__MODULE__{request: request} = conn, method) do
+    %__MODULE__{conn | request: Request.put_method(request, method)}
+  end
+
+  @spec put_req_url(t, String.t) :: t
+  def put_req_url(%__MODULE__{request: request} = conn, url) do
+    %__MODULE__{ conn | request: Request.put_url(request, url)}
+  end
+
+  @spec put_req_headers(t, Request.headers) :: t
+  def put_req_headers(%__MODULE__{request: request} = conn, headers) do
+    %__MODULE__{ conn | request: Request.put_headers(request, headers)}
+  end
+
   defp get_adapter(:default) do
     Application.get_env(:httplaster, :adapter, HTTPlaster.Adapters.Unimplemented)
   end

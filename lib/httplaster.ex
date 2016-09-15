@@ -4,15 +4,6 @@ defmodule HTTPlaster do
   
   alias HTTPlaster.{Conn, Request}
 
-  defdelegate execute(conn), to: Conn
-  defdelegate execute!(conn), to: Conn
-  defdelegate put_url(conn, url), to: Request
-  defdelegate put_method(conn, method), to: Request
-  defdelegate add_header(conn, header, value), to: Request
-  defdelegate add_header(conn, header, value, duplicate_option), to: Request
-  defdelegate add_param(conn, param_name, value), to: Request
-  defdelegate add_param(conn, param_name, value, duplicate_option), to: Request
-
   @doc ~S"""
   Performs an HTTP `DELETE` reqeust on the given resource. 
   """
@@ -135,9 +126,9 @@ defmodule HTTPlaster do
   @spec build_conn_from_function(Request.method, String.t, Request.body, Request.headers, Keyword.t) :: Conn.t
   defp build_conn_from_function(method, url, body, headers, options) do
     %Conn{}
-    |> Request.put_method(method)
-    |> Request.put_url(url)
-    |> Request.put_headers(headers)
+    |> Conn.put_req_method(method)
+    |> Conn.put_req_url(url)
+    |> Conn.put_req_headers(headers)
     |> Conn.put_adapter_options(options)
   end
 end
