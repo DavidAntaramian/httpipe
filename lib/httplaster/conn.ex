@@ -28,12 +28,26 @@ defmodule HTTPlaster.Conn do
   @doc """
   """
   @spec execute(t) :: t
-  def execute(%__MODULE__{request: r, adapter: a, adapter_options: o}) do
+
+  def execute(%__MODULE__{status: :executed}) do
+    {:error, :already_executed}
+  end
+
+  def execute(%__MODULE__{request: r, adapter: a, adapter_options: o} = conn) do
     url = prepare_url(r.url, r.params)
     adapter = get_adapter(a)
     Logger.debug("Adapter set to #{inspect adapter}")
     Logger.debug("Preparing #{inspect r.method} request to #{url}")
-    adapter.execute_request(r.method, url, r.body, r.headers, o)
+    case adapter.execute_request(r.method, url, r.body, r.headers, o) do
+      {:ok, {status_code, headers, body}} ->
+        r = %Response{status_code: status_code, headers: headers, body: body}
+
+        conn = %{conn | status: :executed, response: r}
+
+        {:ok, conn}
+      {:error, reason} ->
+        {:error, reason}
+    end
   end
 
   @doc """
@@ -50,6 +64,11 @@ defmodule HTTPlaster.Conn do
     end
   end
 
+  @spec put_adapter_options(t, Keyword.t) :: t
+  def put_adapter_options(%__MODULE__{} = conn, options) do
+    %{conn | adapter_options: options}
+  end
+
   defp get_adapter(:default) do
     Application.get_env(:httplaster, :adapter, HTTPlaster.Adapters.Unimplemented)
   end
@@ -64,6 +83,9 @@ defmodule HTTPlaster.Conn do
         end)
         |> URI.encode_query()
 
-    "#{base_url}?#{p}"
+    append_params(base_url, p)
   end
+
+  defp append_params(url, ""), do: url
+  defp append_params(url, params), do: "#{url}?#{params}"
 end

@@ -146,6 +146,11 @@ defmodule HTTPlaster.Request do
     %Conn{conn | request: %__MODULE__{ conn.request | headers: headers}}
   end
 
+  @spec put_headers(Conn.t, headers) :: Conn.t
+  def put_headers(conn, headers) do
+    %Conn{conn | request: %__MODULE__{ conn.request | headers: headers}}
+  end
+
   @spec put_method(Conn.t, http_method) :: Conn.t
   def put_method(conn, method) do
     %Conn{conn | request: %__MODULE__{ method: method}}

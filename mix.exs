@@ -15,6 +15,7 @@ defmodule HTTPlaster.Mixfile do
       name: "HTTPlaster",
       version: @version,
       elixir: "~> 1.3",
+      elixirc_paths: elixirc_paths(Mix.env),
       description: @project_description,
       source_url: @source_url,
       homepage_url: @source_url,
@@ -29,9 +30,17 @@ defmodule HTTPlaster.Mixfile do
   def application() do
     [
       env: [httplaster: [adapter: HTTPlaster.Adapters.Unimplemented]],
-      applications: [:logger]
+      applications: apps(Mix.env)
     ]
   end
+
+  defp apps(:test), do: [:inets, :httparrot | apps()]
+  defp apps(_), do: apps()
+
+  defp apps(), do: [:logger]
+
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_), do: ["lib"]
 
   defp docs() do
     [
@@ -60,7 +69,9 @@ defmodule HTTPlaster.Mixfile do
   defp deps do
     [
       {:earmark, "~> 1.0", only: [:dev, :docs]},
-      {:ex_doc, "~> 0.13", only: [:dev, :docs]}
+      {:ex_doc, "~> 0.13", only: [:dev, :docs]},
+      {:httparrot, "~> 0.4.1", only: [:test]},
+      {:poison, "~> 2.2.0", only: [:test]},
     ]
   end
 end

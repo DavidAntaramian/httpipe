@@ -137,5 +137,7 @@ defmodule HTTPlaster do
     %Conn{}
     |> Request.put_method(method)
     |> Request.put_url(url)
+    |> Request.put_headers(headers)
+    |> Conn.put_adapter_options(options)
   end
 end
