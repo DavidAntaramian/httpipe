@@ -53,6 +53,9 @@ defmodule HTTPlaster.Conn do
   @doc """
   Identical to `execute/1` except that it will raise an exception if the
   request could not be completed successfully.
+
+  This will not raise an exception if the HTTP status code is outside the
+  successfull range, though. Status code handling is left to the consumer.
   """
   @spec execute(t) :: t | no_return
   def execute!(conn) do
