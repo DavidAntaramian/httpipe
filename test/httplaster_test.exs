@@ -13,6 +13,12 @@ defmodule HTTPlasterTest do
     :ok
   end
 
+  describe "delete/3" do
+  end
+
+  describe "delete!/3" do
+  end
+
   describe "get/3" do
     test "Can GET from server" do
       request_size = :rand.uniform(200)
@@ -31,6 +37,46 @@ defmodule HTTPlasterTest do
 
       assert accept_header == headers["Accept"]
     end
+  end
 
+  describe "get!/3" do
+  end
+
+  describe "head/3" do
+  end
+
+  describe "head!/3" do
+  end
+
+  describe "options/3" do
+  end
+
+  describe "options!/3" do
+  end
+
+  describe "patch/4" do
+
+  end
+
+  describe "patch!/4" do
+  end
+   
+  describe "post/4" do
+  end
+
+  describe "post!/4" do
+  end
+
+  describe "put/4" do
+  end
+  
+  describe "put!/4" do
+  end
+
+  describe "request/5" do
+
+  end
+
+  describe "request!/5" do
   end
 end
