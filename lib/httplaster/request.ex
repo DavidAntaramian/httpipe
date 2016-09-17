@@ -182,6 +182,21 @@ defmodule HTTPlaster.Request do
     %__MODULE__{ request | body: body }
   end
 
+  @spec prepare_url(url, params) :: String.t
+  def prepare_url(base_url, params) do
+    p = Enum.flat_map(params, fn
+          {key, values} when is_list(values) -> Enum.map(values, &({key, &1}))
+          val -> [val]
+        end)
+        |> URI.encode_query()
+
+    append_params(base_url, p)
+  end
+
+  @spec append_params(url, String.t | params) :: String.t
+  defp append_params(url, ""), do: url
+  defp append_params(url, params), do: "#{url}?#{params}"
+
   @doc """
   Sets the URL for the resource to operate on.
 
@@ -198,5 +213,30 @@ defmodule HTTPlaster.Request do
   @spec put_url(t, String.t) :: t
   def put_url(request, url) do
     %__MODULE__{ request | url: url}
+  end
+
+  defimpl Inspect do
+    import Inspect.Algebra
+    import HTTPlaster.InspectionHelpers
+
+    @spec inspect(HTTPlaster.Request, Inspect.Opts.t) :: Inspect.Algebra.t
+    def inspect(request, opts) do
+      headers = inspect_headers(request.headers)
+      method = inspect_method(request.method)
+      url = inspect_url(request.url, opts)
+      full_url = inspect_full_url(request.url, request.params, opts)
+      params = inspect_params(request.params, opts)
+      body = inspect_body(request.body, opts)
+
+      concat [
+        "Request",
+        method,
+        url,
+        full_url,
+        headers,
+        params,
+        body
+      ]
+    end
   end
 end

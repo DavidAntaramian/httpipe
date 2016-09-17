@@ -36,7 +36,7 @@ defmodule HTTPlaster.Conn do
   end
 
   def execute(%__MODULE__{request: r, adapter: a, adapter_options: o} = conn) do
-    url = prepare_url(r.url, r.params)
+    url = Request.prepare_url(r.url, r.params)
     adapter = get_adapter(a)
     Logger.debug("Adapter set to #{inspect adapter}")
     Logger.debug("Preparing #{inspect r.method} request to #{url}")
@@ -101,18 +101,46 @@ defmodule HTTPlaster.Conn do
 
   defp get_adapter(adapter), do: adapter
 
-  @spec prepare_url(Request.url, Request.params) :: String.t
-  def prepare_url(base_url, params) do
-    p = Enum.flat_map(params, fn 
-          {key, values} when is_list(values) -> Enum.map(values, &({key, &1}))
-          val -> [val]
-        end)
-        |> URI.encode_query()
+  defimpl Inspect do
+    import Inspect.Algebra
+    import HTTPlaster.InspectionHelpers
 
-    append_params(base_url, p)
+    @spec inspect(HTTPlaster.Conn, Inspect.Opts.t) :: Inspect.Algebra.t
+    def inspect(conn, opts) do
+      status_doc =
+        conn.status
+        |> inspect_conn_status()
+
+      adapter_doc =
+        conn.adapter
+        |> to_doc(opts)
+        |> format_nested_with_header("Adapter")
+
+      adapter_options_doc =
+        conn.adapter_options
+        |> to_doc(opts)
+        |> format_nested_with_header("Adapter Options")
+
+      request_doc =
+        conn.request
+        |> to_doc(opts)
+        |> double_line()
+        |> nest(2)
+
+      response_doc =
+        conn.response
+        |> to_doc(opts)
+        |> double_line()
+        |> nest(2)
+
+      concat [
+        "Conn",
+        status_doc,
+        adapter_doc,
+        adapter_options_doc,
+        request_doc,
+        response_doc
+      ]
+    end
   end
-
-  @spec append_params(Request.url, String.t | Request.params) :: String.t
-  defp append_params(url, ""), do: url
-  defp append_params(url, params), do: "#{url}?#{params}"
 end
