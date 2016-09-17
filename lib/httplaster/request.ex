@@ -27,6 +27,10 @@ defmodule HTTPlaster.Request do
   """
   @type http_version :: String.t
 
+  @typdoc ~S"""
+  """
+  @type url :: String.t
+
   @typedoc ~S"""
   The body of a request must always be given as a `String.t`, `nil`, or
   `body_encoding`.
@@ -166,9 +170,11 @@ defmodule HTTPlaster.Request do
 
   @spec put_authentication_basic(t, String.t, String.t) :: t
   def put_authentication_basic(request, username, password) do
-    "#{username}:#{password}"
-    |> Base.encode64(case: :lower)
-
+    credentials =
+      "#{username}:#{password}"
+      |> Base.url_encode64(case: :lower)
+    
+    add_header(request, "Authorization", "Basic #{credentials}", :replace_existing)
   end
   
   @spec put_body(t, body) :: t

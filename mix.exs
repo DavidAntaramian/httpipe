@@ -81,6 +81,7 @@ defmodule HTTPlaster.Mixfile do
       {:httparrot, "~> 0.4.1", only: [:test]},
       {:poison, "~> 2.2.0", only: [:test]},
       {:excoveralls, "~> 0.5", only: [:test]},
+      {:dialyxir, "~> 0.3", only: [:dev, :test]},
     ]
   end
 end

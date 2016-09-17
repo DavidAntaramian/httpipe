@@ -5,7 +5,7 @@ defmodule HTTPlaster.Conn do
 
   """
 
-  alias HTTPlaster.{Request, Response}
+  alias HTTPlaster.{Adapter, Request, Response}
   require Logger
 
   @type status :: :unexecuted | :executed
@@ -18,6 +18,8 @@ defmodule HTTPlaster.Conn do
                adapter_options: Keyword.t
              }
 
+  @type exception :: Adapter.exception
+
   defstruct status: :unexecuted,
             request: %Request{},
             response: %Response{},
@@ -27,7 +29,7 @@ defmodule HTTPlaster.Conn do
 
   @doc """
   """
-  @spec execute(t) :: t
+  @spec execute(t) :: {:ok, t} | {:error, exception}
 
   def execute(%__MODULE__{status: :executed}) do
     {:error, :already_executed}
@@ -57,13 +59,13 @@ defmodule HTTPlaster.Conn do
   This will not raise an exception if the HTTP status code is outside the
   successfull range, though. Status code handling is left to the consumer.
   """
-  @spec execute(t) :: t | no_return
+  @spec execute!(t) :: t | no_return
   def execute!(conn) do
     execute(conn)
     |> case do
-      {:ok, r} -> {:ok, r}
-      {:error, {exception, meta}} ->
-        raise exception, meta
+      {:ok, r} -> r
+      {:error, exception} ->
+        raise exception
     end
   end
 

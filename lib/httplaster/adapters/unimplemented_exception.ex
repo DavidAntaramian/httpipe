@@ -3,6 +3,8 @@ defmodule HTTPlaster.Adapters.UnimplementedException do
   Exception that is raised when no default adapter is specified
   """
 
+  @type t :: %__MODULE__{}
+
   defexception message: """
   No adapter specified.
 
@@ -26,5 +28,6 @@ defmodule HTTPlaster.Adapters.UnimplementedException do
   documentation for your chosen adapter.
   """
   
+  @spec exception(nil) :: t
   def exception(_), do: %__MODULE__{}
 end

@@ -7,40 +7,40 @@ defmodule HTTPlaster do
   @doc ~S"""
   Performs an HTTP `DELETE` reqeust on the given resource. 
   """
-  @spec delete(String.t, Keyword.t | Request.headers, Keyword.t) :: Conn.t
+  @spec delete(Request.url, Keyword.t | Request.headers, Keyword.t) :: {:ok, Conn.t} | {:error, Conn.exception}
   def delete(url, headers \\ %{}, options \\ []), do: request(:delete, url, nil, headers, options)
 
   @doc ~S"""
   Identical to `delete/3` but raises an error if the request could not be
   completed successfully.
   """
-  @spec delete!(String.t, Keyword.t | Request.headers, Keyword.t) :: Conn.t | no_return
+  @spec delete!(Request.url, Keyword.t | Request.headers, Keyword.t) :: Conn.t | no_return
   def delete!(url, headers \\ %{}, options \\ []), do: request!(:delete, url, nil, headers, options)
 
   @doc ~S"""
   Performs an HTTP `GET` request on the given resource.
   """
-  @spec get(String.t, Keyword.t | Request.headers, Keyword.t) :: Conn.t
+  @spec get(Request.url, Keyword.t | Request.headers, Keyword.t) :: {:ok, Conn.t} | {:error, Conn.exception}
   def get(url, headers \\ %{}, options \\ []), do: request(:get, url, nil, headers, options)
 
   @doc ~S"""
   Identical to `get/3` but raises an error if the request could not be
   completed successfully.
   """
-  @spec get!(String.t, Keyword.t | Request.headers, Keyword.t) :: Conn.t | no_return
+  @spec get!(Request.url, Keyword.t | Request.headers, Keyword.t) :: Conn.t | no_return
   def get!(url, headers \\ %{}, options \\ []), do: request!(:get, url, nil, headers, options)
 
   @doc ~S"""
   Performs an HTTP `HEAD` request on the given resource.
   """
-  @spec head(String.t, Keyword.t | Request.headers, Keyword.t) :: Conn.t
+  @spec head(Request.url, Keyword.t | Request.headers, Keyword.t) :: {:ok, Conn.t} | {:error, Conn.exception}
   def head(url, headers \\ %{}, options \\ []), do: request(:head, url, nil, headers, options)
 
   @doc ~S"""
   Identical to `head/3` but raises an error if the request could not be
   completed successfully.
   """
-  @spec head(String.t, Keyword.t | Request.headers, Keyword.t) :: Conn.t | no_return
+  @spec head!(Request.url, Keyword.t | Request.headers, Keyword.t) :: Conn.t | no_return
   def head!(url, headers \\ %{}, options \\ []), do: request!(:head, url, nil, headers, options)
 
   @doc ~S"""
@@ -56,58 +56,58 @@ defmodule HTTPlaster do
   If you need to make an `OPTIONS` request with a body, please use `request/5`
   or `request!/5` as appropriate instead.
   """
-  @spec options(String.t, Keyword.t | Request.headers, Keyword.t) :: Conn.t
+  @spec options(Request.url, Keyword.t | Request.headers, Keyword.t) :: {:ok, Conn.t} | {:error, Conn.exception}
   def options(url, headers \\ %{}, options \\ []), do: request(:options, url, nil, headers, options)
 
   @doc ~S"""
   Identical to `options/3` but raises an error if the request could not be
   completed successfully.
   """
-  @spec options!(String.t, Keyword.t | Request.headers, Keyword.t) :: Conn.t | no_return
+  @spec options!(Request.url, Keyword.t | Request.headers, Keyword.t) :: Conn.t | no_return
   def options!(url, headers \\ %{}, options \\ []), do: request!(:options, url, nil, headers, options)
 
   @doc ~S"""
   Performs an HTTP `PATCH` request on the given resource.
   """
-  @spec patch(String.t, Request.body, Keyword.t | Request.headers, Keyword.t) :: Conn.t
+  @spec patch(Request.url, Request.body, Keyword.t | Request.headers, Keyword.t) :: {:ok, Conn.t} | {:error, Conn.exception}
   def patch(url, body, headers \\ %{}, options \\ []), do: request(:patch, url, body, headers, options)
 
   @doc ~S"""
   Identical to `patch/4` but raises an error if the request could not be
   completed successfully.
   """
-  @spec patch!(String.t, Request.body, Keyword.t | Request.headers, Keyword.t) :: Conn.t | no_return
+  @spec patch!(Request.url, Request.body, Keyword.t | Request.headers, Keyword.t) :: Conn.t | no_return
   def patch!(url, body, headers \\ %{}, options \\ []), do: request!(:patch, url, body, headers, options)
 
   @doc ~S"""
   Perforns an HTTP `POST` request on the given resource.
   """
-  @spec post(String.t, Request.body, Keyword.t | Request.headers, Keyword.t) :: Conn.t
+  @spec post(Request.url, Request.body, Keyword.t | Request.headers, Keyword.t) :: {:ok, Conn.t} | {:error, Conn.exception}
   def post(url, body, headers \\ %{}, options \\ []), do: request(:post, url, body, headers, options)
 
   @doc ~S"""
   Identical to `post/4` but raises an error if the request could not be
   completed succesfully.
   """
-  @spec post!(String.t, Request.body, Keyword.t | Request.headers, Keyword.t) :: Conn.t | no_return
+  @spec post!(Request.url, Request.body, Keyword.t | Request.headers, Keyword.t) :: Conn.t | no_return
   def post!(url, body, headers \\ %{}, options \\ []), do: request!(:post, url, body, headers, options)
 
   @doc ~S"""
   Performns an HTTP `PUT` request on the given resource.
   """
-  @spec put(String.t, Request.body, Keyword.t | Request.headers, Keyword.t) :: Conn.t
+  @spec put(Request.url, Request.body, Keyword.t | Request.headers, Keyword.t) :: {:ok, Conn.t} | {:error, Conn.exception}
   def put(url, body, headers \\ %{}, options \\ []), do: request(:put, url, body, headers, options)
 
   @doc ~S"""
   Identical to `put/4` but raises an error if the request could not be
   completed succesfully.
   """
-  @spec put!(String.t, Request.body, Keyword.t | Request.headers, Keyword.t) :: Conn.t | no_return
+  @spec put!(Request.url, Request.body, Keyword.t | Request.headers, Keyword.t) :: Conn.t | no_return
   def put!(url, body, headers \\ %{}, options \\ []), do: request!(:put, url, body, headers, options)
 
   @doc """
   """
-  @spec request(Request.http_method, String.t, Request.body, Keyword.t | Request.headers, Keyword.t) :: Conn.t
+  @spec request(Request.http_method, Request.url, Request.body, Keyword.t | Request.headers, Keyword.t) :: {:ok, Conn.t} | {:error, Conn.exception}
   def request(method, url, body, headers \\ %{}, options) do
     build_conn_from_function(method, url, body, headers, options)
     |> Conn.execute()
@@ -117,7 +117,7 @@ defmodule HTTPlaster do
   Identical to `request/5` but will raise an error if the request could not
   be completed succesfully.
   """
-  @spec request!(Request.http_method, String.t, Request.body, Keyword.t | Request.headers, Keyword.t) :: Conn.t | no_return
+  @spec request!(Request.http_method, Request.url, Request.body, Keyword.t | Request.headers, Keyword.t) :: Conn.t | no_return
   def request!(method, url, body, headers \\ %{}, options) do
     build_conn_from_function(method, url, body, headers, options)
     |> Conn.execute!()
@@ -125,7 +125,7 @@ defmodule HTTPlaster do
 
   # Helper function that builds a Conn from one of the ease-of-use
   # functions.
-  @spec build_conn_from_function(Request.method, String.t, Request.body, Request.headers, Keyword.t) :: Conn.t
+  @spec build_conn_from_function(Request.http_method, Request.url, Request.body, Request.headers, Keyword.t) :: Conn.t
   defp build_conn_from_function(method, url, body, headers, options) do
     %Conn{}
     |> Conn.put_req_method(method)

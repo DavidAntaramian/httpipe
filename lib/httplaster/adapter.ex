@@ -13,11 +13,11 @@ defmodule HTTPlaster.Adapter do
   
   @typedoc ~S"""
   """
-  @type failure :: {:error, error}
+  @type failure :: {:error, exception}
 
   @typedoc ~S"""
   """
-  @type error :: {module, any}
+  @type exception :: Exception.t
 
   @typedoc ~S"""
   """
