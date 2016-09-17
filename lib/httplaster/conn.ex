@@ -82,11 +82,17 @@ defmodule HTTPlaster.Conn do
     %__MODULE__{ conn | request: Request.put_url(request, url)}
   end
 
+  @spec put_req_body(t, Request.body) :: t
+  def put_req_body(%__MODULE__{request: request} = conn, body) do
+    %__MODULE__{ conn | request: Request.put_body(request, body)}
+  end
+
   @spec put_req_headers(t, Request.headers) :: t
   def put_req_headers(%__MODULE__{request: request} = conn, headers) do
     %__MODULE__{ conn | request: Request.put_headers(request, headers)}
   end
 
+  @spec get_adapter(:default | atom) :: module
   defp get_adapter(:default) do
     Application.get_env(:httplaster, :adapter, HTTPlaster.Adapters.Unimplemented)
   end
@@ -104,6 +110,7 @@ defmodule HTTPlaster.Conn do
     append_params(base_url, p)
   end
 
+  @spec append_params(Request.url, String.t | Request.params) :: String.t
   defp append_params(url, ""), do: url
   defp append_params(url, params), do: "#{url}?#{params}"
 end

@@ -105,6 +105,8 @@ defmodule HTTPlaster do
   @spec put!(String.t, Request.body, Keyword.t | Request.headers, Keyword.t) :: Conn.t | no_return
   def put!(url, body, headers \\ %{}, options \\ []), do: request!(:put, url, body, headers, options)
 
+  @doc """
+  """
   @spec request(Request.http_method, String.t, Request.body, Keyword.t | Request.headers, Keyword.t) :: Conn.t
   def request(method, url, body, headers \\ %{}, options) do
     build_conn_from_function(method, url, body, headers, options)
@@ -128,6 +130,7 @@ defmodule HTTPlaster do
     %Conn{}
     |> Conn.put_req_method(method)
     |> Conn.put_req_url(url)
+    |> Conn.put_req_body(body)
     |> Conn.put_req_headers(headers)
     |> Conn.put_adapter_options(options)
   end

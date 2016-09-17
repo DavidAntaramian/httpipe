@@ -170,6 +170,11 @@ defmodule HTTPlaster.Request do
     |> Base.encode64(case: :lower)
 
   end
+  
+  @spec put_body(t, body) :: t
+  def put_body(request, body) do
+    %__MODULE__{ request | body: body }
+  end
 
   @doc """
   Sets the URL for the resource to operate on.
