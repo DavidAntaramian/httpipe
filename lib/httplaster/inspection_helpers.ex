@@ -3,9 +3,9 @@ defmodule HTTPlaster.InspectionHelpers do
 
   alias HTTPlaster.{Request, Response}
 
-  @spec inspect_header(String.t, String.t) :: Inspect.Algebra.t
+  @spec inspect_header(String.t, String.t) :: String.t
   def inspect_header(k, v) do
-    glue(k, ": ", v)
+    "#{k}: #{v}"
   end
 
   @spec format_nested_with_header(Inspect.Algebra.t, String.t) :: Inspect.Algebra.t
