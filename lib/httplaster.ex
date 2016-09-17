@@ -93,7 +93,7 @@ defmodule HTTPlaster do
   def post!(url, body, headers \\ %{}, options \\ []), do: request!(:post, url, body, headers, options)
 
   @doc ~S"""
-  Performns an HTTP `PUT` request on the given resource.
+  Performs an HTTP `PUT` request on the given resource.
   """
   @spec put(Request.url, Request.body, Keyword.t | Request.headers, Keyword.t) :: {:ok, Conn.t} | {:error, Conn.exception}
   def put(url, body, headers \\ %{}, options \\ []), do: request(:put, url, body, headers, options)
