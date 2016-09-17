@@ -16,6 +16,15 @@ defmodule HTTPlaster.Mixfile do
       version: @version,
       elixir: "~> 1.3",
       elixirc_paths: elixirc_paths(Mix.env),
+      preferred_cli_env: [
+        "coveralls": :test,
+        "coveralls.detail": :test,
+        "coveralls.circle": :test,
+        "coveralls.html": :test
+      ],
+      test_coverage: [
+        tool: ExCoveralls
+      ],
       description: @project_description,
       source_url: @source_url,
       homepage_url: @source_url,
@@ -65,13 +74,13 @@ defmodule HTTPlaster.Mixfile do
     ]
   end
 
-
   defp deps do
     [
       {:earmark, "~> 1.0", only: [:dev, :docs]},
       {:ex_doc, "~> 0.13", only: [:dev, :docs]},
       {:httparrot, "~> 0.4.1", only: [:test]},
       {:poison, "~> 2.2.0", only: [:test]},
+      {:excoveralls, "~> 0.5", only: [:test]},
     ]
   end
 end
