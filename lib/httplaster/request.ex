@@ -62,7 +62,7 @@ defmodule HTTPlaster.Request do
   Headers are stored in a map array of header name (in lower case)
   as a binary to the value as a binary.
   
-  For more information, see the documentation for `add_header/4`.
+  For more information, see the documentation for `put_header/4`.
   """
   @type headers :: %{required(String.t) => String.t}
 
@@ -103,8 +103,8 @@ defmodule HTTPlaster.Request do
 
   ```elixir
   %HTTPlaster.Request{}
-  |> Request.add_header("Accept-Encoding", "gzip")
-  |> Request.add_header("Accept-Encoding", "deflate")
+  |> Request.put_header("Accept-Encoding", "gzip")
+  |> Request.put_header("Accept-Encoding", "deflate")
   ```
 
   will be flattened to the following header:
@@ -118,21 +118,20 @@ defmodule HTTPlaster.Request do
   the new value will always replace the existing value. If `prefer_existing`
   is passed, the header will only be updated if there is no existing value.
   """
-  @spec add_header(t, String.t, String.t, duplicate_options) :: t
-  def add_header(request, header_name, header_value, duplication_option \\ :duplicates_ok)
+  @spec put_header(t, String.t, String.t, duplicate_options) :: t
+  def put_header(request, header_name, header_value, duplication_option \\ :duplicates_ok)
 
-  def add_header(request, header_name, header_value, :duplicates_ok) do
+  def put_header(request, header_name, header_value, :duplicates_ok) do
     name = String.downcase(header_name)
     headers = request.headers
-              |> Map.get_and_update(name, fn
-                 nil -> header_value
-                 existing -> "#{existing}, #{header_value}"
+              |> Map.update(name, header_value, fn existing ->
+                "#{existing}, #{header_value}"
               end)
 
     %__MODULE__{request | headers: headers}
   end
 
-  def add_header(request, header_name, header_value, :prefer_existing) do
+  def put_header(request, header_name, header_value, :prefer_existing) do
     name = String.downcase(header_name)
     headers = request.headers
               |> Map.put_new(name, header_value)
@@ -140,7 +139,7 @@ defmodule HTTPlaster.Request do
     %__MODULE__{ request | headers: headers}
   end
 
-  def add_header(request, header_name, header_value, :replace_existing) do
+  def put_header(request, header_name, header_value, :replace_existing) do
     name = String.downcase(header_name)
     headers = request.headers
               |> Map.put(name, header_value)
@@ -158,10 +157,10 @@ defmodule HTTPlaster.Request do
     %__MODULE__{ request | method: method}
   end
 
-  @spec add_param(t, String.t, String.t, duplicate_options) :: t
-  def add_param(request, param_name, value, duplication_option \\ :replace_existing)
+  @spec put_param(t, String.t, String.t, duplicate_options) :: t
+  def put_param(request, param_name, value, duplication_option \\ :replace_existing)
 
-  def add_param(request, param_name, value, :replace_existing) do
+  def put_param(request, param_name, value, :replace_existing) do
     params = request.params
              |> Map.put(param_name, value)
 
@@ -174,7 +173,7 @@ defmodule HTTPlaster.Request do
       "#{username}:#{password}"
       |> Base.url_encode64(case: :lower)
     
-    add_header(request, "Authorization", "Basic #{credentials}", :replace_existing)
+    put_header(request, "Authorization", "Basic #{credentials}", :replace_existing)
   end
   
   @spec put_body(t, body) :: t

@@ -89,9 +89,24 @@ defmodule HTTPlaster.Conn do
     %__MODULE__{ conn | request: Request.put_body(request, body)}
   end
 
+  @spec put_req_header(t, String.t, String.t, Request.duplicate_options) :: t
+  def put_req_header(%__MODULE__{request: request} = conn, header_name, header_value, duplication_option \\ :duplicates_ok) do
+    %__MODULE__{ conn | request: Request.put_header(request, header_name, header_value, duplication_option) }
+  end
+
   @spec put_req_headers(t, Request.headers) :: t
   def put_req_headers(%__MODULE__{request: request} = conn, headers) do
     %__MODULE__{ conn | request: Request.put_headers(request, headers)}
+  end
+
+  @spec put_req_authentication_basic(t, String.t, String.t) :: t
+  def put_req_authentication_basic(%__MODULE__{request: request} = conn, username, password) do
+    %__MODULE__{ conn | request: Request.put_authentication_basic(request, username, password)}
+  end
+
+  @spec put_req_param(t, String.t, String.t, Request.duplicate_options) :: t
+  def put_req_param(%__MODULE__{request: request} = conn, param_name, value, duplication_option \\ :replace_existing) do
+    %__MODULE__{ conn | request: Request.put_param(request, param_name, value, duplication_option)}
   end
 
   @spec get_adapter(:default | atom) :: module
@@ -100,6 +115,11 @@ defmodule HTTPlaster.Conn do
   end
 
   defp get_adapter(adapter), do: adapter
+
+  @spec new() :: t
+  def new() do
+    %__MODULE__{}
+  end
 
   defimpl Inspect do
     import Inspect.Algebra
