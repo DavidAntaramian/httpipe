@@ -18,22 +18,27 @@ defmodule HTTPlaster.Response do
             body: nil,
             headers: %{}
 
-  defimpl Inspect do
-    import Inspect.Algebra
-    import HTTPlaster.InspectionHelpers
+  @doc """
+  Inspects the structure of the Response struct passed in the same
+  way `IO.inspect/1` might, returning the Response struct so that it
+  can be used easily with pipes.
 
-    @spec inspect(HTTPlaster.Response, Inspect.Opts.t) :: Inspect.Algebra.t
-    def inspect(request, opts) do
-      status_code = inspect_status_code(request.status_code, opts)
-      headers = inspect_headers(request.headers)
-      body = inspect_body(request.body, opts)
+  Typically, `Kernel.inspect/1`, `IO.inspect/1`, and their companions are
+  implemented using the `Inspect` protocol. However, the presentation used
+  here can get extremely intrusive when experimenting using IEx, so it's
+  relegated to this function. Corresponding functions can be found at
+  `HTTPlaster.Conn.inspect/2` and `HTTPlaster.Request.inspect/2`.
 
-      concat [
-        "Response",
-        status_code,
-        headers,
-        body
-      ]
-    end
+  See `HTTPlaster.InspectionHelpers` for more information
+  """
+  @spec inspect(t, Keyword.t) :: t
+  def inspect(resp, opts \\ []) do
+    opts = struct(Inspect.Opts, opts)
+
+    HTTPlaster.InspectionHelpers.inspect_response(resp, opts)
+    |> Inspect.Algebra.format(:infinity)
+    |> IO.puts()
+
+    resp
   end
 end

@@ -43,7 +43,7 @@ defmodule HTTPlaster.Mixfile do
     ]
   end
 
-  defp apps(:test), do: [:inets, :httparrot | apps()]
+  defp apps(:test), do: [:inets, :httparrot, :bypass | apps()]
   defp apps(_), do: apps()
 
   defp apps(), do: [:logger]
@@ -82,6 +82,7 @@ defmodule HTTPlaster.Mixfile do
       {:poison, "~> 2.2.0", only: [:test]},
       {:excoveralls, "~> 0.5", only: [:test]},
       {:dialyxir, "~> 0.3", only: [:dev, :test]},
+      {:bypass, "~> 0.5", only: [:test]},
     ]
   end
 end

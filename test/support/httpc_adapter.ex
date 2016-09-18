@@ -7,7 +7,9 @@ defmodule HTTPlaster.Adapters.HTTPC do
   """
   @behaviour HTTPlaster.Adapter
 
-  def execute_request(method, url, body, headers, options) do
+  alias __MODULE__.{ConnectionFailedError, SendFailedError, GeneralError}
+
+  def execute_request(method, url, body, headers, _options) do
     url = String.to_char_list(url)
 
     headers = 
@@ -30,9 +32,10 @@ defmodule HTTPlaster.Adapters.HTTPC do
     {:ok, pid} = :inets.start(:httpc, profile: profile)
 
     resp =
-      case method do
-        :get -> :httpc.request(:get, {url, header}, [], [body_format: :binary], pid)
-        _ -> :httpc.request(method, {url, header, ct_type, body}, [], [body_format: :binary], pid)
+      if method in [:get, :head, :options, :trace] do
+        :httpc.request(method, {url, header}, [], [body_format: :binary], pid)
+      else
+        :httpc.request(method, {url, header, ct_type, body}, [], [body_format: :binary], pid)
       end
 
     :inets.stop(:httpc, pid)
@@ -54,6 +57,50 @@ defmodule HTTPlaster.Adapters.HTTPC do
   end
 
   defp format_resp({:error, reason}) do
-    {:error, reason}
+    error =
+      case reason do
+        {:failed_connect, _} ->
+          ConnectionFailedError.exception(nil)
+        {:send_failed, _} ->
+          SendFailedError.exception(nil)
+        _ ->
+          GeneralError.exception(nil)
+      end
+
+    {:error, error}
+  end
+
+  defmodule ConnectionFailedError do
+    defexception message: """
+    The host could not be reached.
+    """
+
+    @type t :: %__MODULE__{}
+
+    @spec exception(nil) :: t
+    def exception(_), do: %__MODULE__{}
+  end
+
+  defmodule SendFailedError do
+    defexception message: """
+    Failed to send the request to the host.
+    """
+
+    @type t :: %__MODULE__{}
+
+    @spec exception(nil) :: t
+    def exception(_), do: %__MODULE__{}
+  end
+
+  defmodule GeneralError do
+    defexception message: """
+    The HTTPC adapter encountered an error and was unable to
+    complete the request.
+    """
+
+    @type t :: %__MODULE__{}
+
+    @spec exception(nil) :: t
+    def exception(_), do: %__MODULE__{}
   end
 end

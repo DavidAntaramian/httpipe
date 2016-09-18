@@ -5,6 +5,8 @@ defmodule HTTPlaster.Conn do
 
   """
 
+  import Kernel, except: [inspect: 1]
+
   alias HTTPlaster.{Adapter, Request, Response}
   require Logger
 
@@ -37,10 +39,12 @@ defmodule HTTPlaster.Conn do
 
   def execute(%__MODULE__{request: r, adapter: a, adapter_options: o} = conn) do
     url = Request.prepare_url(r.url, r.params)
+    defer_body = defer_body_processing?(conn)
+    body = Request.prepare_body(r.body, defer_body)
     adapter = get_adapter(a)
     Logger.debug("Adapter set to #{inspect adapter}")
     Logger.debug("Preparing #{inspect r.method} request to #{url}")
-    case adapter.execute_request(r.method, url, r.body, r.headers, o) do
+    case adapter.execute_request(r.method, url, body, r.headers, o) do
       {:ok, {status_code, headers, body}} ->
         r = %Response{status_code: status_code, headers: headers, body: body}
 
@@ -116,51 +120,40 @@ defmodule HTTPlaster.Conn do
 
   defp get_adapter(adapter), do: adapter
 
+  @spec defer_body_processing?(t) :: boolean
+  def defer_body_processing?(conn) do
+    adapter_preference = Keyword.get(conn.adapter_options, :defer_body_processing, false)
+    general_preference = Application.get_env(:httplaster, :defer_body_processing, false)
+
+    adapter_preference || general_preference
+  end
+
   @spec new() :: t
   def new() do
     %__MODULE__{}
   end
 
-  defimpl Inspect do
-    import Inspect.Algebra
-    import HTTPlaster.InspectionHelpers
+  @doc """
+  Inspects the structure of the Conn struct passed in the same
+  way `IO.inspect/1` might, returning the Conn struct so that it
+  can be used easily with pipes.
 
-    @spec inspect(HTTPlaster.Conn, Inspect.Opts.t) :: Inspect.Algebra.t
-    def inspect(conn, opts) do
-      status_doc =
-        conn.status
-        |> inspect_conn_status()
+  Typically, `Kernel.inspect/1`, `IO.inspect/1`, and their companions are
+  implemented using the `Inspect` protocol. However, the presentation used
+  here can get extremely intrusive when experimenting using IEx, so it's
+  relegated to this function. Corresponding functions can be found at
+  `HTTPlaster.Request.inspect/2` and `HTTPlaster.Response.inspect/2`.
 
-      adapter_doc =
-        conn.adapter
-        |> to_doc(opts)
-        |> format_nested_with_header("Adapter")
+  See `HTTPlaster.InspectionHelpers` for more information
+  """
+  @spec inspect(t, Keyword.t) :: t
+  def inspect(conn, opts \\ []) do
+    opts = struct(Inspect.Opts, opts)
 
-      adapter_options_doc =
-        conn.adapter_options
-        |> to_doc(opts)
-        |> format_nested_with_header("Adapter Options")
+    HTTPlaster.InspectionHelpers.inspect_conn(conn, opts)
+    |> Inspect.Algebra.format(:infinity)
+    |> IO.puts()
 
-      request_doc =
-        conn.request
-        |> to_doc(opts)
-        |> double_line()
-        |> nest(2)
-
-      response_doc =
-        conn.response
-        |> to_doc(opts)
-        |> double_line()
-        |> nest(2)
-
-      concat [
-        "Conn",
-        status_doc,
-        adapter_doc,
-        adapter_options_doc,
-        request_doc,
-        response_doc
-      ]
-    end
+    conn
   end
 end

@@ -35,15 +35,15 @@ defmodule HTTPlaster.Request do
   The body of a request must always be given as a `String.t`, `nil`, or
   `body_encoding`.
 
-  In the event that the body is `nil`, the adapter _should not_ send a
-  body payload. An empty string (`""`) should not be treated the same
-  as `nil`.
+  A `nil` body is shorthand for an empty string (`""`) which will be sent
+  when the connection is executed.
   """
   @type body :: nil | String.t | body_encoding
 
   @typedoc ~S"""
   The body encoding specifies a specific way to encode the body
-  prior to sending it to the server.
+  prior to sending it to the server. It is still the responsibility
+  of the consumer to set the appropriate `Content-Type` header.
 
   ## Sending Files
   
@@ -157,12 +157,22 @@ defmodule HTTPlaster.Request do
     %__MODULE__{ request | method: method}
   end
 
-  @spec put_param(t, String.t, String.t, duplicate_options) :: t
+  @spec put_param(t, String.t | atom, String.t, duplicate_options) :: t
   def put_param(request, param_name, value, duplication_option \\ :replace_existing)
 
   def put_param(request, param_name, value, :replace_existing) do
     params = request.params
              |> Map.put(param_name, value)
+
+    %__MODULE__{ request | params: params}
+  end
+
+  def put_param(request, param_name, value, :duplicates_ok) do
+    params =
+      request.params
+      |> Map.update(param_name, [value], fn existing ->
+        [value | existing]
+      end)
 
     %__MODULE__{ request | params: params}
   end
@@ -183,11 +193,18 @@ defmodule HTTPlaster.Request do
 
   @spec prepare_url(url, params) :: String.t
   def prepare_url(base_url, params) do
-    p = Enum.flat_map(params, fn
-          {key, values} when is_list(values) -> Enum.map(values, &({key, &1}))
-          val -> [val]
-        end)
-        |> URI.encode_query()
+    p =
+      Enum.flat_map(params, fn
+        # key with multiple values
+        # will be encoded as ?key=value1&key=value2 (etc.)
+        {key, [values]} when is_list(values) ->
+          Enum.map(values, fn v -> {key, v} end)
+        # key with a singular value in a list
+        # will be encoded as ?key=value
+        {key, [value]} ->
+          [{key, value}]
+      end)
+      |> URI.encode_query()
 
     append_params(base_url, p)
   end
@@ -195,6 +212,23 @@ defmodule HTTPlaster.Request do
   @spec append_params(url, String.t | params) :: String.t
   defp append_params(url, ""), do: url
   defp append_params(url, params), do: "#{url}?#{params}"
+
+  @spec prepare_body(body, boolean) :: String.t | body
+  def prepare_body(body, defer_body_processing)
+  def prepare_body(body, true), do: body
+  def prepare_body(body, false), do: encode_body(body)
+
+  @spec encode_body(body) :: String.t
+  def encode_body(body)
+
+  def encode_body(body) when is_binary(body), do: body
+  def encode_body(nil), do: ""
+  def encode_body({:form, form_data}), do: URI.encode_query(form_data)
+
+  def encode_body({:file, filename}) do
+    {:ok, data} = File.read(filename)
+    data
+  end
 
   @doc """
   Sets the URL for the resource to operate on.
@@ -214,28 +248,27 @@ defmodule HTTPlaster.Request do
     %__MODULE__{ request | url: url}
   end
 
-  defimpl Inspect do
-    import Inspect.Algebra
-    import HTTPlaster.InspectionHelpers
+  @doc """
+  Inspects the structure of the Request struct passed in the same
+  way `IO.inspect/1` might, returning the Request struct so that it
+  can be used easily with pipes.
 
-    @spec inspect(HTTPlaster.Request, Inspect.Opts.t) :: Inspect.Algebra.t
-    def inspect(request, opts) do
-      headers = inspect_headers(request.headers)
-      method = inspect_method(request.method)
-      url = inspect_url(request.url, opts)
-      full_url = inspect_full_url(request.url, request.params, opts)
-      params = inspect_params(request.params, opts)
-      body = inspect_body(request.body, opts)
+  Typically, `Kernel.inspect/1`, `IO.inspect/1`, and their companions are
+  implemented using the `Inspect` protocol. However, the presentation used
+  here can get extremely intrusive when experimenting using IEx, so it's
+  relegated to this function. Corresponding functions can be found at
+  `HTTPlaster.Conn.inspect/2` and `HTTPlaster.Response.inspect/2`.
 
-      concat [
-        "Request",
-        method,
-        url,
-        full_url,
-        headers,
-        params,
-        body
-      ]
-    end
+  See `HTTPlaster.InspectionHelpers` for more information
+  """
+  @spec inspect(t, Keyword.t) :: t
+  def inspect(req, opts \\ []) do
+    opts = struct(Inspect.Opts, opts)
+
+    HTTPlaster.InspectionHelpers.inspect_request(req, opts)
+    |> Inspect.Algebra.format(:infinity)
+    |> IO.puts()
+
+    req
   end
 end

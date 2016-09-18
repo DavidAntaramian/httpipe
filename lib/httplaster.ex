@@ -127,11 +127,17 @@ defmodule HTTPlaster do
   # functions.
   @spec build_conn_from_function(Request.http_method, Request.url, Request.body, Request.headers, Keyword.t) :: Conn.t
   defp build_conn_from_function(method, url, body, headers, options) do
-    %Conn{}
-    |> Conn.put_req_method(method)
-    |> Conn.put_req_url(url)
-    |> Conn.put_req_body(body)
-    |> Conn.put_req_headers(headers)
-    |> Conn.put_adapter_options(options)
+    adapter_options = Keyword.get(options, :adapter, [])
+    params = Keyword.get(options, :params, [])
+
+    conn =
+      %Conn{}
+      |> Conn.put_req_method(method)
+      |> Conn.put_req_url(url)
+      |> Conn.put_req_body(body)
+      |> Conn.put_req_headers(headers)
+      |> Conn.put_adapter_options(adapter_options)
+
+    Enum.reduce(params, conn, fn ({k, v}, c) -> Conn.put_req_param(c, k, v, :duplicates_ok) end)
   end
 end
