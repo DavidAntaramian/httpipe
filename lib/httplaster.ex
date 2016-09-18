@@ -5,9 +5,9 @@ defmodule HTTPlaster do
   alias HTTPlaster.{Conn, Request}
 
   @doc ~S"""
-  Performs an HTTP `DELETE` reqeust on the given resource. 
+  Performs an HTTP `DELETE` reqeust on the given resource.
   """
-  @spec delete(Request.url, Keyword.t | Request.headers, Keyword.t) :: {:ok, Conn.t} | {:error, Conn.exception}
+  @spec delete(Request.url, Keyword.t | Request.headers, Keyword.t) :: {:ok, Conn.t} | {:error, Conn.t}
   def delete(url, headers \\ %{}, options \\ []), do: request(:delete, url, nil, headers, options)
 
   @doc ~S"""
@@ -20,7 +20,7 @@ defmodule HTTPlaster do
   @doc ~S"""
   Performs an HTTP `GET` request on the given resource.
   """
-  @spec get(Request.url, Keyword.t | Request.headers, Keyword.t) :: {:ok, Conn.t} | {:error, Conn.exception}
+  @spec get(Request.url, Keyword.t | Request.headers, Keyword.t) :: {:ok, Conn.t} | {:error, Conn.t}
   def get(url, headers \\ %{}, options \\ []), do: request(:get, url, nil, headers, options)
 
   @doc ~S"""
@@ -33,7 +33,7 @@ defmodule HTTPlaster do
   @doc ~S"""
   Performs an HTTP `HEAD` request on the given resource.
   """
-  @spec head(Request.url, Keyword.t | Request.headers, Keyword.t) :: {:ok, Conn.t} | {:error, Conn.exception}
+  @spec head(Request.url, Keyword.t | Request.headers, Keyword.t) :: {:ok, Conn.t} | {:error, Conn.t}
   def head(url, headers \\ %{}, options \\ []), do: request(:head, url, nil, headers, options)
 
   @doc ~S"""
@@ -56,7 +56,7 @@ defmodule HTTPlaster do
   If you need to make an `OPTIONS` request with a body, please use `request/5`
   or `request!/5` as appropriate instead.
   """
-  @spec options(Request.url, Keyword.t | Request.headers, Keyword.t) :: {:ok, Conn.t} | {:error, Conn.exception}
+  @spec options(Request.url, Keyword.t | Request.headers, Keyword.t) :: {:ok, Conn.t} | {:error, Conn.t}
   def options(url, headers \\ %{}, options \\ []), do: request(:options, url, nil, headers, options)
 
   @doc ~S"""
@@ -69,7 +69,7 @@ defmodule HTTPlaster do
   @doc ~S"""
   Performs an HTTP `PATCH` request on the given resource.
   """
-  @spec patch(Request.url, Request.body, Keyword.t | Request.headers, Keyword.t) :: {:ok, Conn.t} | {:error, Conn.exception}
+  @spec patch(Request.url, Request.body, Keyword.t | Request.headers, Keyword.t) :: {:ok, Conn.t} | {:error, Conn.t}
   def patch(url, body, headers \\ %{}, options \\ []), do: request(:patch, url, body, headers, options)
 
   @doc ~S"""
@@ -82,7 +82,7 @@ defmodule HTTPlaster do
   @doc ~S"""
   Perforns an HTTP `POST` request on the given resource.
   """
-  @spec post(Request.url, Request.body, Keyword.t | Request.headers, Keyword.t) :: {:ok, Conn.t} | {:error, Conn.exception}
+  @spec post(Request.url, Request.body, Keyword.t | Request.headers, Keyword.t) :: {:ok, Conn.t} | {:error, Conn.t}
   def post(url, body, headers \\ %{}, options \\ []), do: request(:post, url, body, headers, options)
 
   @doc ~S"""
@@ -95,7 +95,7 @@ defmodule HTTPlaster do
   @doc ~S"""
   Performs an HTTP `PUT` request on the given resource.
   """
-  @spec put(Request.url, Request.body, Keyword.t | Request.headers, Keyword.t) :: {:ok, Conn.t} | {:error, Conn.exception}
+  @spec put(Request.url, Request.body, Keyword.t | Request.headers, Keyword.t) :: {:ok, Conn.t} | {:error, Conn.t}
   def put(url, body, headers \\ %{}, options \\ []), do: request(:put, url, body, headers, options)
 
   @doc ~S"""
@@ -107,7 +107,7 @@ defmodule HTTPlaster do
 
   @doc """
   """
-  @spec request(Request.http_method, Request.url, Request.body, Keyword.t | Request.headers, Keyword.t) :: {:ok, Conn.t} | {:error, Conn.exception}
+  @spec request(Request.http_method, Request.url, Request.body, Keyword.t | Request.headers, Keyword.t) :: {:ok, Conn.t} | {:error, Conn.t}
   def request(method, url, body, headers \\ %{}, options) do
     build_conn_from_function(method, url, body, headers, options)
     |> Conn.execute()

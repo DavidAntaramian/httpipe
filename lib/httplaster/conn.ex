@@ -15,6 +15,7 @@ defmodule HTTPlaster.Conn do
 
   @type t :: %__MODULE__{
                status: status,
+               error: exception | nil,
                request: Request.t,
                response: Response.t,
                adapter: atom,
@@ -24,6 +25,7 @@ defmodule HTTPlaster.Conn do
   @type exception :: Adapter.exception
 
   defstruct status: :unexecuted,
+            error: nil,
             request: %Request{},
             response: %Response{},
             adapter: :default,
@@ -32,7 +34,7 @@ defmodule HTTPlaster.Conn do
 
   @doc """
   """
-  @spec execute(t) :: {:ok, t} | {:error, exception}
+  @spec execute(t) :: {:ok, t} | {:error, t}
 
   def execute(%__MODULE__{status: :unexecuted, request: r, adapter: a, adapter_options: o} = conn) do
     url = Request.prepare_url(r.url, r.params)
@@ -49,7 +51,8 @@ defmodule HTTPlaster.Conn do
 
         {:ok, conn}
       {:error, reason} ->
-        {:error, reason}
+        conn = %{conn | status: :failed, error: reason}
+        {:error, conn}
     end
   end
 
@@ -70,7 +73,7 @@ defmodule HTTPlaster.Conn do
     execute(conn)
     |> case do
       {:ok, r} -> r
-      {:error, exception} ->
+      {:error, %__MODULE__{status: :failed, error: exception}} ->
         raise exception
     end
   end
