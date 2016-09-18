@@ -11,16 +11,19 @@ defmodule HTTPlaster.Conn do
   alias __MODULE__.{AlreadyExecutedError}
   require Logger
 
-  @type status :: :unexecuted | :executed
+  @type status :: :unexecuted | :executed | :failed
 
   @type t :: %__MODULE__{
                status: status,
                error: exception | nil,
                request: Request.t,
                response: Response.t,
+               options: options,
                adapter: atom,
                adapter_options: Keyword.t
              }
+
+  @type options :: %{}
 
   @type exception :: Adapter.exception
 
@@ -28,6 +31,9 @@ defmodule HTTPlaster.Conn do
             error: nil,
             request: %Request{},
             response: %Response{},
+            options: %{
+              defer_body_processing: false
+            },
             adapter: :default,
             adapter_options: []
 
@@ -126,11 +132,11 @@ defmodule HTTPlaster.Conn do
   defp get_adapter(adapter), do: adapter
 
   @spec defer_body_processing?(t) :: boolean
-  def defer_body_processing?(conn) do
-    adapter_preference = Keyword.get(conn.adapter_options, :defer_body_processing, false)
+  defp defer_body_processing?(conn) do
+    local_preference = conn.options.defer_body_processing
     general_preference = Application.get_env(:httplaster, :defer_body_processing, false)
 
-    adapter_preference || general_preference
+    local_preference || general_preference
   end
 
   @spec new() :: t

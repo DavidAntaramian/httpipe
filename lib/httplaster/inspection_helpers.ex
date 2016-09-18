@@ -12,6 +12,15 @@ defmodule HTTPlaster.InspectionHelpers do
     status_doc =
       conn.status
       |> inspect_conn_status(opts)
+    
+    error_doc =
+      conn.error
+      |> inspect_error(opts)
+
+    options_doc =
+      conn.options
+      |> to_doc(opts)
+      |> format_nested_with_header("Options")
 
     adapter_doc =
       conn.adapter
@@ -38,6 +47,8 @@ defmodule HTTPlaster.InspectionHelpers do
     concat [
       format_section_head("Conn"),
       status_doc,
+      error_doc,
+      options_doc,
       adapter_doc,
       adapter_options_doc,
       request_doc,
@@ -48,6 +59,7 @@ defmodule HTTPlaster.InspectionHelpers do
   @spec inspect_request(Request.t, Inspect.Opts.t) :: Inspect.Algebra.t
   def inspect_request(request, opts) do
     headers = inspect_headers(request.headers)
+    http_version = inspect_http_version(request.version, opts)
     method = inspect_method(request.method)
     url = inspect_url(request.url, opts)
     full_url = inspect_full_url(request.url, request.params, opts)
@@ -56,6 +68,7 @@ defmodule HTTPlaster.InspectionHelpers do
 
     concat [
       format_section_head("Request"),
+      http_version,
       method,
       url,
       full_url,
@@ -84,21 +97,36 @@ defmodule HTTPlaster.InspectionHelpers do
     "#{k}: #{v}"
   end
 
+  @spec inspect_error(nil | Conn.exception, Inspect.Opts.t) :: Inspect.Algebra.t
 
-  @doc """
-  Inserts two lines above the algebra document for spacing
-  """
-  @spec double_line_break(Inspect.Algebra.t) :: Inspect.Algebra.t
-  def double_line_break(doc) do
-    lower_line = line("", doc)
-    line("", lower_line)
+  def inspect_error(nil, _), do: empty()
+
+  def inspect_error(error, opts) do
+    error
+    |> to_doc(opts)
+    |> format_nested_with_header("Error", :error)
   end
 
   @spec inspect_conn_status(atom, Inspect.Opts.t) :: Inspect.Algebra.t
-  def inspect_conn_status(status, opts) do
-    status
-    |> to_doc(opts)
+  def inspect_conn_status(status, _opts) do
+    ansify_status(status)
     |> format_nested_with_header("Status")
+  end
+
+  @spec ansify_status(Conn.status) :: String.t
+  defp ansify_status(:executed) do
+    IO.ANSI.format([:green, ":executed"])
+    |> IO.iodata_to_binary()
+  end
+
+  defp ansify_status(:unexecuted) do
+    IO.ANSI.format([:yellow, ":unexecuted"])
+    |> IO.iodata_to_binary()
+  end
+
+  defp ansify_status(:failed) do
+    IO.ANSI.format([:red, ":failed"])
+    |> IO.iodata_to_binary()
   end
 
   @spec inspect_url(Request.url, Inspect.Opts.t) :: Inspect.Algebra.t
@@ -120,6 +148,12 @@ defmodule HTTPlaster.InspectionHelpers do
   def inspect_full_url(base_url, params, _) do
     Request.prepare_url(base_url, params)
     |> format_nested_with_header("Full URL (with query string)")
+  end
+
+  @spec inspect_http_version(Request.http_version, Inspect.Opts.t) :: Inspect.Algebra.t
+  def inspect_http_version(version, opts) do
+    to_doc(version, opts)
+    |> format_nested_with_header("HTTP Version")
   end
 
   @spec inspect_params(Request.params, Inspect.Opts.t) :: Inspect.Algebra.t
@@ -168,13 +202,36 @@ defmodule HTTPlaster.InspectionHelpers do
     |> format_nested_with_header("Status Code")
   end
 
-  @spec format_nested_with_header(Inspect.Algebra.t, String.t) :: Inspect.Algebra.t
-  def format_nested_with_header(body, header) do
+  @doc """
+  Inserts two lines above the algebra document for spacing
+  """
+  @spec double_line_break(Inspect.Algebra.t) :: Inspect.Algebra.t
+  def double_line_break(doc) do
+    lower_line = line("", doc)
+    line("", lower_line)
+  end
+
+  @spec format_nested_with_header(Inspect.Algebra.t, String.t, atom) :: Inspect.Algebra.t
+  def format_nested_with_header(body, header, type \\ :default)
+
+  def format_nested_with_header(body, header, :default) do
     nested_body =
       line("", body)
       |> nest(2)
 
     IO.ANSI.format([:blue, header])
+    |> IO.iodata_to_binary()
+    |> line(nested_body)
+    |> double_line_break()
+    |> nest(2)
+  end
+
+  def format_nested_with_header(body, header, :error) do
+    nested_body =
+      line("", body)
+      |> nest(2)
+
+    IO.ANSI.format([:red, header])
     |> IO.iodata_to_binary()
     |> line(nested_body)
     |> double_line_break()

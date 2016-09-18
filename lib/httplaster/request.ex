@@ -162,7 +162,7 @@ defmodule HTTPlaster.Request do
 
   def put_param(request, param_name, value, :replace_existing) do
     params = request.params
-             |> Map.put(param_name, value)
+             |> Map.put(param_name, [value])
 
     %__MODULE__{ request | params: params}
   end
@@ -173,6 +173,13 @@ defmodule HTTPlaster.Request do
       |> Map.update(param_name, [value], fn existing ->
         [value | existing]
       end)
+
+    %__MODULE__{ request | params: params}
+  end
+
+  def put_param(request, param_name, value, :prefer_existing) do
+    params = request.params
+              |> Map.put_new(param_name, [value])
 
     %__MODULE__{ request | params: params}
   end
