@@ -83,6 +83,7 @@ defmodule HTTPlaster.Mixfile do
       {:excoveralls, "~> 0.5", only: [:test]},
       {:dialyxir, "~> 0.3", only: [:dev, :test]},
       {:bypass, "~> 0.5", only: [:test]},
+      {:credo, "~> 0.4", only: [:dev, :test]},
     ]
   end
 end
