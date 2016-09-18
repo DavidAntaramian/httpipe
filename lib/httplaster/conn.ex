@@ -8,6 +8,7 @@ defmodule HTTPlaster.Conn do
   import Kernel, except: [inspect: 1]
 
   alias HTTPlaster.{Adapter, Request, Response}
+  alias __MODULE__.{AlreadyExecutedError}
   require Logger
 
   @type status :: :unexecuted | :executed
@@ -33,17 +34,13 @@ defmodule HTTPlaster.Conn do
   """
   @spec execute(t) :: {:ok, t} | {:error, exception}
 
-  def execute(%__MODULE__{status: :executed}) do
-    {:error, :already_executed}
-  end
-
-  def execute(%__MODULE__{request: r, adapter: a, adapter_options: o} = conn) do
+  def execute(%__MODULE__{status: :unexecuted, request: r, adapter: a, adapter_options: o} = conn) do
     url = Request.prepare_url(r.url, r.params)
     defer_body = defer_body_processing?(conn)
     body = Request.prepare_body(r.body, defer_body)
     adapter = get_adapter(a)
-    Logger.debug("Adapter set to #{inspect adapter}")
-    Logger.debug("Preparing #{inspect r.method} request to #{url}")
+    _ = Logger.debug("Adapter set to #{Kernel.inspect adapter}")
+    _ = Logger.debug("Preparing #{Kernel.inspect r.method} request to #{url}")
     case adapter.execute_request(r.method, url, body, r.headers, o) do
       {:ok, {status_code, headers, body}} ->
         r = %Response{status_code: status_code, headers: headers, body: body}
@@ -54,6 +51,11 @@ defmodule HTTPlaster.Conn do
       {:error, reason} ->
         {:error, reason}
     end
+  end
+
+  def execute(%__MODULE__{status: :executed}) do
+    error = AlreadyExecutedError.exception(nil)
+    {:error, error}
   end
 
   @doc """
