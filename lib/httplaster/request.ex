@@ -114,7 +114,7 @@ defmodule HTTPlaster.Request do
   will be flattened to the following header:
 
   ```text
-  Accept-Encoding: gzip, deflate
+  accept-encoding: gzip, deflate
   ```
 
   However, this behavior can be changed by specifying a different behavior
@@ -127,33 +127,45 @@ defmodule HTTPlaster.Request do
 
   def put_header(request, header_name, header_value, :duplicates_ok) do
     name = String.downcase(header_name)
-    headers = request.headers
-              |> Map.update(name, header_value, fn existing ->
-                "#{existing}, #{header_value}"
-              end)
+    headers =
+      request.headers
+      |> Map.update(name, header_value, fn existing ->
+        "#{existing}, #{header_value}"
+      end)
 
     %__MODULE__{request | headers: headers}
   end
 
   def put_header(request, header_name, header_value, :prefer_existing) do
     name = String.downcase(header_name)
-    headers = request.headers
-              |> Map.put_new(name, header_value)
+
+    headers =
+      request.headers
+      |> Map.put_new(name, header_value)
 
     %__MODULE__{request | headers: headers}
   end
 
   def put_header(request, header_name, header_value, :replace_existing) do
     name = String.downcase(header_name)
-    headers = request.headers
-              |> Map.put(name, header_value)
+
+    headers =
+      request.headers
+      |> Map.put(name, header_value)
 
     %__MODULE__{request | headers: headers}
   end
 
-  @spec put_headers(t, headers) :: t
-  def put_headers(request, headers) do
-    %__MODULE__{request | headers: headers}
+  @spec clear_headers(t) :: t
+  def clear_headers(request) do
+    %__MODULE__{request | headers: %{}}
+  end
+
+  @spec merge_headers(t, headers) :: t
+  def merge_headers(request, headers) do
+    Enum.reduce(headers, request, fn {k, v}, acc_req ->
+      put_header(acc_req, k, v, :replace_existing)
+    end)
   end
 
   @spec put_method(t, http_method) :: t
@@ -165,8 +177,9 @@ defmodule HTTPlaster.Request do
   def put_param(request, param_name, value, duplication_option \\ :replace_existing)
 
   def put_param(request, param_name, value, :replace_existing) do
-    params = request.params
-             |> Map.put(param_name, [value])
+    params =
+      request.params
+      |> Map.put(param_name, [value])
 
     %__MODULE__{request | params: params}
   end
@@ -182,8 +195,9 @@ defmodule HTTPlaster.Request do
   end
 
   def put_param(request, param_name, value, :prefer_existing) do
-    params = request.params
-              |> Map.put_new(param_name, [value])
+    params =
+      request.params
+      |> Map.put_new(param_name, [value])
 
     %__MODULE__{request | params: params}
   end

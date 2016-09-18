@@ -127,9 +127,15 @@ defmodule HTTPlaster.Conn do
     %__MODULE__{conn | request: new_request}
   end
 
-  @spec put_req_headers(t, Request.headers) :: t
-  def put_req_headers(%__MODULE__{request: request} = conn, headers) do
-    new_request = Request.put_headers(request, headers)
+  @spec clear_req_headers(t) :: t
+  def clear_req_headers(%__MODULE__{request: request} = conn) do
+    new_request = Request.clear_headers(request)
+    %__MODULE__{conn | request: new_request}
+  end
+
+  @spec merge_req_headers(t, Request.headers) :: t
+  def merge_req_headers(%__MODULE__{request: request} = conn, headers) do
+    new_request = Request.merge_headers(request, headers)
     %__MODULE__{conn | request: new_request}
   end
 

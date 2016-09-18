@@ -135,7 +135,7 @@ defmodule HTTPlaster do
       |> Conn.put_req_method(method)
       |> Conn.put_req_url(url)
       |> Conn.put_req_body(body)
-      |> Conn.put_req_headers(headers)
+      |> Conn.merge_req_headers(headers)
       |> Conn.put_adapter_options(adapter_options)
 
     Enum.reduce(params, conn, fn ({k, v}, c) -> Conn.put_req_param(c, k, v, :duplicates_ok) end)
