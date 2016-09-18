@@ -8,6 +8,9 @@ defmodule HTTPlaster.Request do
   structs and update internal `Request` structs.
   """
 
+  alias HTTPlaster.InspectionHelpers
+  alias __MODULE__.{NilURLError}
+
   @typedoc """
   A specifier for the HTTP method
 
@@ -46,12 +49,12 @@ defmodule HTTPlaster.Request do
   of the consumer to set the appropriate `Content-Type` header.
 
   ## Sending Files
-  
+
   The `{:file, filename}` option  will cause the file located at `:file` to
   be sent as the body of the request.
 
   ## Form-Encoding
-  
+
   The `{:form, parameters}` option will cause the parameters (encoded as keyword lists)
   to be sent to be transformed into a `form-urlencoded` value before being
   sent as the body of the request.
@@ -61,7 +64,7 @@ defmodule HTTPlaster.Request do
   @typedoc ~S"""
   Headers are stored in a map array of header name (in lower case)
   as a binary to the value as a binary.
-  
+
   For more information, see the documentation for `put_header/4`.
   """
   @type headers :: %{required(String.t) => String.t}
@@ -97,7 +100,8 @@ defmodule HTTPlaster.Request do
 
   ## Duplicate Headers
 
-  Following the guidance of [RFC 2612 4.2](https://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.2),
+  Following the guidance of
+  [RFC 2612 4.2](https://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.2),
   duplicate headers are accomodated by flattening them into a comma-separated
   list. This is the default behavior. For example,
 
@@ -189,16 +193,22 @@ defmodule HTTPlaster.Request do
     credentials =
       "#{username}:#{password}"
       |> Base.url_encode64(case: :lower)
-    
+
     put_header(request, "Authorization", "Basic #{credentials}", :replace_existing)
   end
-  
+
   @spec put_body(t, body) :: t
   def put_body(request, body) do
     %__MODULE__{request | body: body}
   end
 
-  @spec prepare_url(url, params) :: String.t
+  @spec prepare_url(url, params) :: {:ok, String.t} | {:error, Exception.t}
+  def prepare_url(nil, _) do
+    error = NilURLError.exception([])
+
+    {:error, error}
+  end
+
   def prepare_url(base_url, params) do
     p =
       Enum.flat_map(params, fn
@@ -213,28 +223,33 @@ defmodule HTTPlaster.Request do
       end)
       |> URI.encode_query()
 
-    append_params(base_url, p)
+    {:ok, append_params(base_url, p)}
   end
 
   @spec append_params(url, String.t | params) :: String.t
   defp append_params(url, ""), do: url
   defp append_params(url, params), do: "#{url}?#{params}"
 
-  @spec prepare_body(body, boolean) :: String.t | body
+  @spec prepare_body(body, boolean) :: {:ok, String.t | body} | {:error, Exception.t}
   def prepare_body(body, defer_body_processing)
-  def prepare_body(body, true), do: body
+  def prepare_body(body, true), do: {:ok, body}
   def prepare_body(body, false), do: encode_body(body)
 
-  @spec encode_body(body) :: String.t
+  @spec encode_body(body) :: {:ok, String.t} | {:error, Exception.t}
   def encode_body(body)
 
-  def encode_body(body) when is_binary(body), do: body
-  def encode_body(nil), do: ""
-  def encode_body({:form, form_data}), do: URI.encode_query(form_data)
+  def encode_body(body) when is_binary(body), do: {:ok, body}
+  def encode_body(nil), do: {:ok, ""}
+  def encode_body({:form, form_data}), do: {:ok, URI.encode_query(form_data)}
 
-  def encode_body({:file, filename}) do
-    {:ok, data} = File.read(filename)
-    data
+  def encode_body({:file, filepath}) do
+    case File.read(filepath) do
+      {:ok, binary} ->
+        {:ok, binary}
+      {:error, reason} ->
+        error = File.Error.exception(reason: reason, action: "read file", path: filepath)
+        {:error, error}
+    end
   end
 
   @doc """
@@ -245,7 +260,7 @@ defmodule HTTPlaster.Request do
   resource. If necessary, also include the port.
 
   ## Basic Authentication
-  
+
   If you need to use HTTP Basic authentication, *do not* include the
   username and password as part of the URL. Instead, please use the
   `put_authentication_basic/3` function.
@@ -272,7 +287,7 @@ defmodule HTTPlaster.Request do
   def inspect(req, opts \\ []) do
     opts = struct(Inspect.Opts, opts)
 
-    HTTPlaster.InspectionHelpers.inspect_request(req, opts)
+    InspectionHelpers.inspect_request(req, opts)
     |> Inspect.Algebra.format(:infinity)
     |> IO.puts()
 

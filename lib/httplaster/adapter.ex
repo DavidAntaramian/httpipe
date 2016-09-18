@@ -10,7 +10,7 @@ defmodule HTTPlaster.Adapter do
 
   """
   @type success :: {:ok, response}
-  
+
   @typedoc ~S"""
   """
   @type failure :: {:error, exception}
@@ -50,7 +50,7 @@ defmodule HTTPlaster.Adapter do
   """
   @callback execute_request(
     Request.http_method,
-    String.t,
+    Request.url,
     Request.body,
     Request.headers,
     options

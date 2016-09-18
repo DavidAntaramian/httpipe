@@ -12,7 +12,7 @@ defmodule HTTPlaster.InspectionHelpers do
     status_doc =
       conn.status
       |> inspect_conn_status(opts)
-    
+
     error_doc =
       conn.error
       |> inspect_error(opts)
@@ -146,8 +146,8 @@ defmodule HTTPlaster.InspectionHelpers do
   end
 
   def inspect_full_url(base_url, params, _) do
-    Request.prepare_url(base_url, params)
-    |> format_nested_with_header("Full URL (with query string)")
+    {:ok, full_url} = Request.prepare_url(base_url, params)
+    format_nested_with_header(full_url, "Full URL (with query string)")
   end
 
   @spec inspect_http_version(Request.http_version, Inspect.Opts.t) :: Inspect.Algebra.t

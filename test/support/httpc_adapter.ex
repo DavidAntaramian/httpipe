@@ -2,7 +2,8 @@ defmodule HTTPlaster.Adapters.HTTPC do
   @moduledoc """
   An :httpc client based largely on the HTTPClient for Phoenix testing
 
-  The majority of this was built using [Phoenix.Integration.HTTPClient](https://github.com/phoenixframework/phoenix/blob/069028a31cfcbcd2027209c67b08d1d8dcf3c7c0/test/support/http_client.exs)
+  The majority of this was built using
+  https://github.com/phoenixframework/phoenix/blob/069028a/test/support/http_client.exs
   but changed to reflect the expectations of the behaviour
   """
   @behaviour HTTPlaster.Adapter
@@ -12,7 +13,7 @@ defmodule HTTPlaster.Adapters.HTTPC do
   def execute_request(method, url, body, headers, _options) do
     url = String.to_char_list(url)
 
-    headers = 
+    headers =
       headers
       |> Map.put_new("content-type", "text/html")
 

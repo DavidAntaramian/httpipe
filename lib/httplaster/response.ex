@@ -2,6 +2,8 @@ defmodule HTTPlaster.Response do
   @moduledoc """
   """
 
+  alias HTTPlaster.InspectionHelpers
+
   @type status_code :: 100..599
 
   @type body :: nil | String.t
@@ -35,7 +37,7 @@ defmodule HTTPlaster.Response do
   def inspect(resp, opts \\ []) do
     opts = struct(Inspect.Opts, opts)
 
-    HTTPlaster.InspectionHelpers.inspect_response(resp, opts)
+    InspectionHelpers.inspect_response(resp, opts)
     |> Inspect.Algebra.format(:infinity)
     |> IO.puts()
 

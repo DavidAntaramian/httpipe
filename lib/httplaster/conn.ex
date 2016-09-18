@@ -7,7 +7,7 @@ defmodule HTTPlaster.Conn do
 
   import Kernel, except: [inspect: 1]
 
-  alias HTTPlaster.{Adapter, Request, Response}
+  alias HTTPlaster.{Adapter, Request, Response, InspectionHelpers}
   alias __MODULE__.{AlreadyExecutedError}
   require Logger
 
@@ -42,29 +42,43 @@ defmodule HTTPlaster.Conn do
   """
   @spec execute(t) :: {:ok, t} | {:error, t}
 
-  def execute(%__MODULE__{status: :unexecuted, request: r, adapter: a, adapter_options: o} = conn) do
-    url = Request.prepare_url(r.url, r.params)
+  def execute(%__MODULE__{status: :unexecuted, request: r, adapter: a} = conn) do
     defer_body = defer_body_processing?(conn)
-    body = Request.prepare_body(r.body, defer_body)
     adapter = get_adapter(a)
-    _ = Logger.debug("Adapter set to #{Kernel.inspect adapter}")
-    _ = Logger.debug("Preparing #{Kernel.inspect r.method} request to #{url}")
-    case adapter.execute_request(r.method, url, body, r.headers, o) do
-      {:ok, {status_code, headers, body}} ->
-        r = %Response{status_code: status_code, headers: headers, body: body}
 
-        conn = %{conn | status: :executed, response: r}
+    result =
+      with {:ok, url} <- Request.prepare_url(r.url, r.params),
+           {:ok, body} <- Request.prepare_body(r.body, defer_body),
+        do: execute_prepared_conn(conn, adapter, url, body)
 
-        {:ok, conn}
-      {:error, reason} ->
-        conn = %{conn | status: :failed, error: reason}
-        {:error, conn}
-    end
+    handle_adapter_resp(conn, result)
   end
 
   def execute(%__MODULE__{status: :executed}) do
     error = AlreadyExecutedError.exception(nil)
     {:error, error}
+  end
+
+  @spec execute_prepared_conn(t, module, Request.url, Request.body)
+          :: Adapter.success | Adapter.failure
+  def execute_prepared_conn(%__MODULE__{request: r, adapter_options: o}, adapter, url, body) do
+    _ = Logger.debug("Adapter set to #{Kernel.inspect adapter}")
+    _ = Logger.debug("Preparing #{Kernel.inspect r.method} request to #{url}")
+    adapter.execute_request(r.method, url, body, r.headers, o)
+  end
+
+  @spec handle_adapter_resp(t, Adapter.success | Adapter.failure) :: {:ok, t} | {:error, t}
+  defp handle_adapter_resp(conn, {:ok, {status_code, headers, body}}) do
+    r = %Response{status_code: status_code, headers: headers, body: body}
+
+    conn = %{conn | status: :executed, response: r}
+
+    {:ok, conn}
+  end
+
+  defp handle_adapter_resp(conn, {:error, reason}) do
+    conn = %{conn | status: :failed, error: reason}
+    {:error, conn}
   end
 
   @doc """
@@ -91,37 +105,44 @@ defmodule HTTPlaster.Conn do
 
   @spec put_req_method(t, Request.http_method) :: t
   def put_req_method(%__MODULE__{request: request} = conn, method) do
-    %__MODULE__{conn | request: Request.put_method(request, method)}
+    new_request = Request.put_method(request, method)
+    %__MODULE__{conn | request: new_request}
   end
 
   @spec put_req_url(t, String.t) :: t
   def put_req_url(%__MODULE__{request: request} = conn, url) do
-    %__MODULE__{conn | request: Request.put_url(request, url)}
+    new_request = Request.put_url(request, url)
+    %__MODULE__{conn | request: new_request}
   end
 
   @spec put_req_body(t, Request.body) :: t
   def put_req_body(%__MODULE__{request: request} = conn, body) do
-    %__MODULE__{conn | request: Request.put_body(request, body)}
+    new_request = Request.put_body(request, body)
+    %__MODULE__{conn | request: new_request}
   end
 
   @spec put_req_header(t, String.t, String.t, Request.duplicate_options) :: t
   def put_req_header(%__MODULE__{request: request} = conn, header_name, header_value, duplication_option \\ :duplicates_ok) do
-    %__MODULE__{conn | request: Request.put_header(request, header_name, header_value, duplication_option)}
+    new_request = Request.put_header(request, header_name, header_value, duplication_option)
+    %__MODULE__{conn | request: new_request}
   end
 
   @spec put_req_headers(t, Request.headers) :: t
   def put_req_headers(%__MODULE__{request: request} = conn, headers) do
-    %__MODULE__{conn | request: Request.put_headers(request, headers)}
+    new_request = Request.put_headers(request, headers)
+    %__MODULE__{conn | request: new_request}
   end
 
   @spec put_req_authentication_basic(t, String.t, String.t) :: t
   def put_req_authentication_basic(%__MODULE__{request: request} = conn, username, password) do
-    %__MODULE__{conn | request: Request.put_authentication_basic(request, username, password)}
+    new_request = Request.put_authentication_basic(request, username, password)
+    %__MODULE__{conn | request: new_request}
   end
 
   @spec put_req_param(t, String.t, String.t, Request.duplicate_options) :: t
   def put_req_param(%__MODULE__{request: request} = conn, param_name, value, duplication_option \\ :replace_existing) do
-    %__MODULE__{conn | request: Request.put_param(request, param_name, value, duplication_option)}
+    new_request = Request.put_param(request, param_name, value, duplication_option)
+    %__MODULE__{conn | request: new_request}
   end
 
   @spec get_adapter(:default | atom) :: module
@@ -161,7 +182,7 @@ defmodule HTTPlaster.Conn do
   def inspect(conn, opts \\ []) do
     opts = struct(Inspect.Opts, opts)
 
-    HTTPlaster.InspectionHelpers.inspect_conn(conn, opts)
+    InspectionHelpers.inspect_conn(conn, opts)
     |> Inspect.Algebra.format(:infinity)
     |> IO.puts()
 

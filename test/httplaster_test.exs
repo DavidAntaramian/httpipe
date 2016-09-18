@@ -1,6 +1,8 @@
 defmodule HTTPlasterTest do
   use ExUnit.Case, async: false
 
+  @lint {Credo.Check.Design.AliasUsage, false}
+
   setup do
     default_adapter = Application.get_env(:httplaster, :adapter)
 
@@ -149,7 +151,7 @@ defmodule HTTPlasterTest do
       end
     end
   end
-   
+
   describe "HTTPlaster.post/4" do
     test "sends POST to server" do
       server = Bypass.open()
@@ -191,7 +193,7 @@ defmodule HTTPlasterTest do
       {:ok, _} = HTTPlaster.put(server_address, "")
     end
   end
-  
+
   describe "HTTPlaster.put!/4" do
     test "raises when it cannot connect to server" do
       server = Bypass.open()
