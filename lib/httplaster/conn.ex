@@ -86,7 +86,7 @@ defmodule HTTPlaster.Conn do
 
   @spec put_adapter_options(t, Keyword.t) :: t
   def put_adapter_options(%__MODULE__{} = conn, options) do
-    %{conn | adapter_options: options}
+    %__MODULE__{conn | adapter_options: options}
   end
 
   @spec put_req_method(t, Request.http_method) :: t
@@ -96,32 +96,32 @@ defmodule HTTPlaster.Conn do
 
   @spec put_req_url(t, String.t) :: t
   def put_req_url(%__MODULE__{request: request} = conn, url) do
-    %__MODULE__{ conn | request: Request.put_url(request, url)}
+    %__MODULE__{conn | request: Request.put_url(request, url)}
   end
 
   @spec put_req_body(t, Request.body) :: t
   def put_req_body(%__MODULE__{request: request} = conn, body) do
-    %__MODULE__{ conn | request: Request.put_body(request, body)}
+    %__MODULE__{conn | request: Request.put_body(request, body)}
   end
 
   @spec put_req_header(t, String.t, String.t, Request.duplicate_options) :: t
   def put_req_header(%__MODULE__{request: request} = conn, header_name, header_value, duplication_option \\ :duplicates_ok) do
-    %__MODULE__{ conn | request: Request.put_header(request, header_name, header_value, duplication_option) }
+    %__MODULE__{conn | request: Request.put_header(request, header_name, header_value, duplication_option)}
   end
 
   @spec put_req_headers(t, Request.headers) :: t
   def put_req_headers(%__MODULE__{request: request} = conn, headers) do
-    %__MODULE__{ conn | request: Request.put_headers(request, headers)}
+    %__MODULE__{conn | request: Request.put_headers(request, headers)}
   end
 
   @spec put_req_authentication_basic(t, String.t, String.t) :: t
   def put_req_authentication_basic(%__MODULE__{request: request} = conn, username, password) do
-    %__MODULE__{ conn | request: Request.put_authentication_basic(request, username, password)}
+    %__MODULE__{conn | request: Request.put_authentication_basic(request, username, password)}
   end
 
   @spec put_req_param(t, String.t, String.t, Request.duplicate_options) :: t
   def put_req_param(%__MODULE__{request: request} = conn, param_name, value, duplication_option \\ :replace_existing) do
-    %__MODULE__{ conn | request: Request.put_param(request, param_name, value, duplication_option)}
+    %__MODULE__{conn | request: Request.put_param(request, param_name, value, duplication_option)}
   end
 
   @spec get_adapter(:default | atom) :: module

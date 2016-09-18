@@ -136,7 +136,7 @@ defmodule HTTPlaster.Request do
     headers = request.headers
               |> Map.put_new(name, header_value)
 
-    %__MODULE__{ request | headers: headers}
+    %__MODULE__{request | headers: headers}
   end
 
   def put_header(request, header_name, header_value, :replace_existing) do
@@ -144,17 +144,17 @@ defmodule HTTPlaster.Request do
     headers = request.headers
               |> Map.put(name, header_value)
 
-    %__MODULE__{ request | headers: headers}
+    %__MODULE__{request | headers: headers}
   end
 
   @spec put_headers(t, headers) :: t
   def put_headers(request, headers) do
-    %__MODULE__{ request | headers: headers}
+    %__MODULE__{request | headers: headers}
   end
 
   @spec put_method(t, http_method) :: t
   def put_method(request, method) do
-    %__MODULE__{ request | method: method}
+    %__MODULE__{request | method: method}
   end
 
   @spec put_param(t, String.t | atom, String.t, duplicate_options) :: t
@@ -164,7 +164,7 @@ defmodule HTTPlaster.Request do
     params = request.params
              |> Map.put(param_name, [value])
 
-    %__MODULE__{ request | params: params}
+    %__MODULE__{request | params: params}
   end
 
   def put_param(request, param_name, value, :duplicates_ok) do
@@ -174,14 +174,14 @@ defmodule HTTPlaster.Request do
         [value | existing]
       end)
 
-    %__MODULE__{ request | params: params}
+    %__MODULE__{request | params: params}
   end
 
   def put_param(request, param_name, value, :prefer_existing) do
     params = request.params
               |> Map.put_new(param_name, [value])
 
-    %__MODULE__{ request | params: params}
+    %__MODULE__{request | params: params}
   end
 
   @spec put_authentication_basic(t, String.t, String.t) :: t
@@ -195,7 +195,7 @@ defmodule HTTPlaster.Request do
   
   @spec put_body(t, body) :: t
   def put_body(request, body) do
-    %__MODULE__{ request | body: body }
+    %__MODULE__{request | body: body}
   end
 
   @spec prepare_url(url, params) :: String.t
@@ -252,7 +252,7 @@ defmodule HTTPlaster.Request do
   """
   @spec put_url(t, String.t) :: t
   def put_url(request, url) do
-    %__MODULE__{ request | url: url}
+    %__MODULE__{request | url: url}
   end
 
   @doc """
