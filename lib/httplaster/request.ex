@@ -225,15 +225,8 @@ defmodule HTTPlaster.Request do
 
   def prepare_url(base_url, params) do
     p =
-      Enum.flat_map(params, fn
-        # key with multiple values
-        # will be encoded as ?key=value1&key=value2 (etc.)
-        {key, [values]} when is_list(values) ->
-          Enum.map(values, fn v -> {key, v} end)
-        # key with a singular value in a list
-        # will be encoded as ?key=value
-        {key, [value]} ->
-          [{key, value}]
+      Enum.flat_map(params, fn {key, values} ->
+        Enum.map(values, fn v -> {key, v} end)
       end)
       |> URI.encode_query()
 

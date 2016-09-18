@@ -59,7 +59,7 @@ defmodule HTTPlaster.InspectionHelpers do
   @spec inspect_request(Request.t, Inspect.Opts.t) :: Inspect.Algebra.t
   def inspect_request(request, opts) do
     headers = inspect_headers(request.headers)
-    http_version = inspect_http_version(request.version, opts)
+    http_version = inspect_http_version(request.http_version, opts)
     method = inspect_method(request.method)
     url = inspect_url(request.url, opts)
     full_url = inspect_full_url(request.url, request.params, opts)

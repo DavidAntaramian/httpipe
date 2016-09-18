@@ -246,11 +246,11 @@ defmodule HTTPlasterTest do
       server = Bypass.open()
       server_address = "http://localhost:#{server.port}"
 
-      params = [q: "string theory", v: ["1", "2"]]
+      params = [q: "string theory", v: "1", v: "2"]
 
       Bypass.expect(server, fn conn ->
         assert conn.method == "GET"
-        assert conn.query_string == "q=string+theory&v=1&v=2"
+        assert conn.query_string == "q=string+theory&v=2&v=1"
 
         Plug.Conn.send_resp(conn, 204, "")
       end)

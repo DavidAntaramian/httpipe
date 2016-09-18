@@ -61,7 +61,7 @@ defmodule HTTPlaster.Conn do
 
   @spec execute_prepared_conn(t, module, Request.url, Request.body)
           :: Adapter.success | Adapter.failure
-  def execute_prepared_conn(%__MODULE__{request: r, adapter_options: o}, adapter, url, body) do
+  defp execute_prepared_conn(%__MODULE__{request: r, adapter_options: o}, adapter, url, body) do
     _ = Logger.debug("Adapter set to #{Kernel.inspect adapter}")
     _ = Logger.debug("Preparing #{Kernel.inspect r.method} request to #{url}")
     adapter.execute_request(r.method, url, body, r.headers, o)
@@ -151,12 +151,23 @@ defmodule HTTPlaster.Conn do
     %__MODULE__{conn | request: new_request}
   end
 
-  @spec get_adapter(:default | atom) :: module
+  @spec get_adapter(:default | module) :: module
   defp get_adapter(:default) do
     Application.get_env(:httplaster, :adapter, HTTPlaster.Adapters.Unimplemented)
   end
 
   defp get_adapter(adapter), do: adapter
+
+  @spec put_adapter(t, module) :: t
+  def put_adapter(%__MODULE__{} = conn, adapter) do
+    %__MODULE__{conn | adapter: adapter}
+  end
+
+  @spec defer_body_processing(t, boolean) :: t
+  def defer_body_processing(%__MODULE__{options: options} = conn, defer? \\ true) do
+    new_options = %{options | defer_body_processing: defer?}
+    %__MODULE__{conn | options: new_options}
+  end
 
   @spec defer_body_processing?(t) :: boolean
   defp defer_body_processing?(conn) do

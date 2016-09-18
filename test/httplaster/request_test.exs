@@ -3,20 +3,6 @@ defmodule HTTPlaster.RequestTest do
 
   alias HTTPlaster.Request
 
-  setup tags do
-    default_adapter = Application.get_env(:httplaster, :adapter)
-
-    if tags[:httpc_adapter] do
-      Application.put_env(:httplaster, :adapter, HTTPlaster.Adapters.HTTPC)
-    end
-
-    on_exit(fn ->
-      Application.put_env(:httplaster, :adapter, default_adapter)
-    end)
-
-    :ok
-  end
-
   describe "HTTPlaster.Request.encode_body/1" do
     test "encodes nil" do
       assert Request.encode_body(nil) == {:ok, ""}
@@ -65,6 +51,15 @@ defmodule HTTPlaster.RequestTest do
       params = %{q: ["plataformatec Elixir"], tbas: [0]}
 
       expected_url = "https://google.com/?q=plataformatec+Elixir&tbas=0"
+
+      assert Request.prepare_url(url, params) == {:ok, expected_url}
+    end
+
+    test "returns prepared url with multiple params of the same name" do
+      url = "https://google.com/"
+      params = %{q: ["plataformatec Elixir"], tbas: [0, 1]}
+
+      expected_url = "https://google.com/?q=plataformatec+Elixir&tbas=0&tbas=1"
 
       assert Request.prepare_url(url, params) == {:ok, expected_url}
     end
