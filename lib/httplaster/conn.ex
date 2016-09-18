@@ -62,8 +62,6 @@ defmodule HTTPlaster.Conn do
   @spec execute_prepared_conn(t, module, Request.url, Request.body)
           :: Adapter.success | Adapter.failure
   defp execute_prepared_conn(%__MODULE__{request: r, adapter_options: o}, adapter, url, body) do
-    _ = Logger.debug("Adapter set to #{Kernel.inspect adapter}")
-    _ = Logger.debug("Preparing #{Kernel.inspect r.method} request to #{url}")
     adapter.execute_request(r.method, url, body, r.headers, o)
   end
 
