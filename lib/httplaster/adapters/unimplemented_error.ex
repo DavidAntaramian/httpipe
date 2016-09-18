@@ -1,4 +1,4 @@
-defmodule HTTPlaster.Adapters.UnimplementedException do
+defmodule HTTPlaster.Adapters.UnimplementedError do
   @moduledoc """
   Exception that is raised when no default adapter is specified
   """
