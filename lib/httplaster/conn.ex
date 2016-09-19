@@ -163,7 +163,7 @@ defmodule HTTPlaster.Conn do
   ~~~
   {:ok, conn} =
     Conn.new()
-    |> Conn.put_url("https://httpbin.org/get")
+    |> Conn.put_req_url("https://httpbin.org/get")
     |> Conn.execute()
 
   conn.status # :executed
@@ -459,7 +459,7 @@ defmodule HTTPlaster.Conn do
   ~~~
   conn =
     Conn.new()
-    |> Conn.put_url("https://httpbin.org/basic-auth/username/password")
+    |> Conn.put_req_url("https://httpbin.org/basic-auth/username/password")
     |> Conn.put_authentication_basic("username", "password")
   ~~~
 
@@ -481,7 +481,7 @@ defmodule HTTPlaster.Conn do
   ~~~
   conn =
     Conn.new()
-    |> Conn.put_url("https://google.com/#")
+    |> Conn.put_req_url("https://google.com/#")
     |> Conn.put_req_param(:q, "httplaster elixir")
   ~~~
 

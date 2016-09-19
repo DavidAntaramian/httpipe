@@ -185,34 +185,34 @@ defmodule HTTPlaster.RequestTest do
   describe "HTTPlaster.Request.put_param/4" do
     test "with default duplication option will replace existing params" do
       request =
-        %Request{params: %{q: ["plataformatec Elixir"], tbas: [0]}}
+        %Request{params: %{"q" => ["plataformatec Elixir"], "tbas" => [0]}}
         |> Request.put_param(:tbas, 1)
 
-      assert {:tbas, [1]} in request.params
+      assert {"tbas", [1]} in request.params
     end
 
     test "with :duplicates_ok will prepend to the list of values" do
       request =
-        %Request{params: %{q: ["plataformatec Elixir"], tbas: [0]}}
+        %Request{params: %{"q" => ["plataformatec Elixir"], "tbas" => [0]}}
         |> Request.put_param(:tbas, 1, :duplicates_ok)
 
-      assert {:tbas, [1, 0]} in request.params
+      assert {"tbas", [1, 0]} in request.params
     end
 
     test "with :prefer_existing will leave values as-is" do
       request =
-        %Request{params: %{q: ["plataformatec Elixir"], tbas: [0]}}
+        %Request{params: %{"q" => ["plataformatec Elixir"], "tbas" => [0]}}
         |> Request.put_param(:tbas, 1, :prefer_existing)
 
-      assert {:tbas, [0]} in request.params
+      assert {"tbas", [0]} in request.params
     end
 
     test "with :replace_existing will replace existing values" do
       request =
-        %Request{params: %{q: ["plataformatec Elixir"], tbas: [0]}}
+        %Request{params: %{"q" => ["plataformatec Elixir"], "tbas" => [0]}}
         |> Request.put_param(:tbas, 1, :replace_existing)
 
-      assert {:tbas, [1]} in request.params
+      assert {"tbas", [1]} in request.params
     end
   end
 

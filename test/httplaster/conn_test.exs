@@ -383,7 +383,7 @@ defmodule HTTPlaster.ConnTest do
         Server.send_resp(server_conn, 204, "")
       end)
 
-      params = %{q: ["plataformatec Elixir"], tbas: [0]}
+      params = %{"q" => ["plataformatec Elixir"], "tbas" => [0]}
 
       {:ok, _client_conn} =
         %Conn{request: %Request{params: params}}
@@ -402,7 +402,7 @@ defmodule HTTPlaster.ConnTest do
         Server.send_resp(server_conn, 204, "")
       end)
 
-      params = %{q: ["plataformatec Elixir"], tbas: [0]}
+      params = %{"q" => ["plataformatec Elixir"], "tbas" => [0]}
 
       {:ok, _client_conn} =
         %Conn{request: %Request{params: params}}
@@ -421,7 +421,7 @@ defmodule HTTPlaster.ConnTest do
         Server.send_resp(server_conn, 204, "")
       end)
 
-      params = %{q: ["plataformatec Elixir"], tbas: [0]}
+      params = %{"q" => ["plataformatec Elixir"], "tbas" => [0]}
 
       {:ok, _client_conn} =
         %Conn{request: %Request{params: params}}
@@ -440,7 +440,7 @@ defmodule HTTPlaster.ConnTest do
         Server.send_resp(server_conn, 204, "")
       end)
 
-      params = %{q: ["plataformatec Elixir"], tbas: [0]}
+      params = %{"q" => ["plataformatec Elixir"], "tbas" => [0]}
 
       {:ok, _client_conn} =
         %Conn{request: %Request{params: params}}

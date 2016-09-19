@@ -1,15 +1,51 @@
 defmodule HTTPlaster.Response do
   @moduledoc """
+  An HTTP response from a server.
   """
 
   alias HTTPlaster.InspectionHelpers
 
+  @typedoc """
+  The status code returned by the server.
+
+  Valid status codes are considered to be in the range 100 to 599 (inclusive),
+  but the actual range used by HTTP servers is commonly a smaller subset
+  of that range. See [this site](https://httpstatuses.com/) for more reference
+  on individual status codes.
+  """
   @type status_code :: 100..599
 
-  @type body :: nil | String.t
+  @typedoc """
+  The body returned by the server.
 
+  This will always be a string, even if it is empty. While a server
+  may return different content types, they will always be string encoded
+  and further processing must be done to decode them into a target format.
+  """
+  @type body :: String.t
+
+  @typedoc """
+  Headers returned by the server are stored in a map of header names (in
+  lower case) to their values. The names and values are always of the type
+  `String.t`.
+  """
   @type headers :: %{required(String.t) => String.t}
 
+  @typedoc """
+  Encapsulates an HTTP response
+
+  #### :status_code
+
+  The status code returned by the server. See the `status_code` type.
+
+  #### :body
+
+  The body returned by the server. See the `body` type.
+
+  #### :headers
+
+  The headers returned by the server. See the `headers` type.
+  """
   @type t :: %__MODULE__{
                status_code: status_code,
                body: body,

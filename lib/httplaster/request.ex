@@ -35,8 +35,13 @@ defmodule HTTPlaster.Request do
   @type http_version :: String.t
 
   @typdoc ~S"""
+  Specifies a resource to access
+
+  The URL should include the scheme, domain, and request path.
+  It is possible for the URL to be `nil`, but this will cause an error
+  when attempting to execute the request.
   """
-  @type url :: String.t
+  @type url :: String.t | nil
 
   @typedoc ~S"""
   The body of a request must always be given as a `String.t`, `nil`, or
@@ -49,13 +54,17 @@ defmodule HTTPlaster.Request do
 
   @typedoc ~S"""
   The body encoding specifies a specific way to encode the body
-  prior to sending it to the server. It is still the responsibility
-  of the consumer to set the appropriate `Content-Type` header.
+  prior to sending it to the server.
+
+  It is still the responsibility of the consumer to set the appropriate
+  `Content-Type` header.
 
   ## Sending Files
 
   The `{:file, filename}` option  will cause the file located at `:file` to
-  be sent as the body of the request.
+  be sent as the body of the request. Note that this is not the same as
+  sending a file with `mutlipart/form-data`. In this case, the file's contents
+  will be the payload of the request.
 
   ## Form-Encoding
 
@@ -66,21 +75,101 @@ defmodule HTTPlaster.Request do
   @type body_encoding :: {:file, String.t} | {:form, Keyword.t}
 
   @typedoc ~S"""
-  Headers are stored in a map array of header name (in lower case)
-  as a binary to the value as a binary.
+  Headers are stored in a map of header names (in lower case)
+  to their values.
+
+  The names and values are always of the type `String.t`.
+
+  For example:
+
+  ~~~
+  %{
+    "accept" => "application/json",
+    "content-type" => "application/json"
+  }
+  ~~~
 
   For more information, see the documentation for `put_header/4`.
   """
   @type headers :: %{required(String.t) => String.t}
 
-  @type params :: map()
+  @typedoc ~S"""
+  Query params are stored as a map of keys as strings to a _list_
+  of string values.
 
+  Because it is possible for query parameters to be repeated in
+  a query string, values are stored in a list.
+
+  For example:
+
+  ~~~
+  %{
+    "q" => ["Elixir HTTPlaster"],
+    "tbas" => [0, 1]
+  }
+  ~~~
+
+  will be encoded as:
+
+  ~~~txt
+  q=Elixir+HTTPlaster&tbas=0&tbas=1
+  ~~~
+
+  Unlike headers, query parameters are stored in the case they are provided
+  in. For more information, see the documentation for `put_param/4`.
+  """
+  @type params :: %{required(String.t) => [String.t]}
+
+  @typedoc """
+  Duplication options for setting headers and query params
+
+  #### :duplicates_ok
+
+  If a value already exists, the new value will be merged with the
+  current value
+
+  #### :prefer_existing
+
+  If a value already exists, the new value will be discarded
+
+  #### :replace_existing
+
+  If a value already exists, the new value will overwrite the existing
+  value
+  """
   @type duplicate_options :: :replace_existing | :prefer_existing | :duplicates_ok
 
+  @typedoc """
+  Encapsulates an HTTP request
+
+  #### :method
+
+  The HTTP method to use for the request. See the `http_method` type.
+
+  #### :http_version
+
+  The HTTP version to use for the request. See the `http_version` type.
+
+  #### :url
+
+  The URL to make the request against. By default, this is `nil`. See the `url` type.
+
+  #### :headers
+  
+  The headers for the request. By default, this is an empty map. See the `headers` type.
+
+  #### :params
+  
+  The query params for the request. By default, this is an empty map. See the `params` type.
+
+  #### :body
+  
+  The body for the request. By default, this is `nil`. See the `body` type.
+  """
   @type t :: %__MODULE__{
                method: http_method,
                http_version: http_version,
-               url: String.t,
+               url: url,
                headers: headers,
                params: params,
                body: body,
@@ -109,17 +198,17 @@ defmodule HTTPlaster.Request do
   duplicate headers are accomodated by flattening them into a comma-separated
   list. This is the default behavior. For example,
 
-  ```elixir
+  ~~~
   %HTTPlaster.Request{}
   |> Request.put_header("Accept-Encoding", "gzip")
   |> Request.put_header("Accept-Encoding", "deflate")
-  ```
+  ~~~
 
   will be flattened to the following header:
 
-  ```text
+  ~~~txt
   accept-encoding: gzip, deflate
-  ```
+  ~~~
 
   However, this behavior can be changed by specifying a different behavior
   for duplicates as the final parameter. If `replace_existing` is passed,
@@ -160,11 +249,49 @@ defmodule HTTPlaster.Request do
     %__MODULE__{request | headers: headers}
   end
 
+  @doc """
+  Clears the existing request headers
+
+  This will reset the internal store of request headers to an empty map.
+  However, certain default request headers determined by the adapter
+  will still be sent even if the headers map is empty.
+  """
   @spec clear_headers(t) :: t
   def clear_headers(request) do
     %__MODULE__{request | headers: %{}}
   end
 
+  @doc """
+  Merges a map of headers into the existing headers
+
+  ## Example
+
+  ~~~
+  headers_to_merge = %{
+    "accept" => "application/json",
+    "accept-encoding" => "deflate",
+    "connection" => "keep-alive"
+  }
+
+  %Request{}
+  |> Request.put_header("Accept", "application/xml")
+  |> Request.put_header("Content-Type", "application/json")
+  |> Request.put_header("Accept-Encoding", "gzip")
+  |> Request.merge_headers(headers_to_merge)
+  ~~~
+
+  will result in the following header list:
+
+  ~~~txt
+  accept-encoding: deflate
+  accept: applicaiton/json
+  connection: keep-alive
+  content-type: application/json
+  ~~~
+
+  This function will replace any existing headers with the same name (regardless
+  of casing).
+  """
   @spec merge_headers(t, headers) :: t
   def merge_headers(request, headers) do
     Enum.reduce(headers, request, fn {k, v}, acc_req ->
@@ -172,15 +299,38 @@ defmodule HTTPlaster.Request do
     end)
   end
 
+  @doc """
+  Sets the method to be used with the request
+  """
   @spec put_method(t, http_method) :: t
   def put_method(request, method) do
     %__MODULE__{request | method: method}
   end
 
+  @doc """
+  Adds a query parameter to the request
+
+  ## Example
+  For example, this request:
+
+  ~~~
+  %Request{}
+  |> Request.put_url("https://google.com/#")
+  |> Request.put_param(:q, "httplaster elixir")
+  ~~~
+
+  will generate the following URL when the connection is executed:
+
+  ~~~txt
+  https://google.com/#?q=httplaster+elixir
+  ~~~
+  """
   @spec put_param(t, String.t | atom, String.t, duplicate_options) :: t
   def put_param(request, param_name, value, duplication_option \\ :replace_existing)
 
   def put_param(request, param_name, value, :replace_existing) do
+    param_name = param_to_string(param_name)
+
     params =
       request.params
       |> Map.put(param_name, [value])
@@ -189,6 +339,8 @@ defmodule HTTPlaster.Request do
   end
 
   def put_param(request, param_name, value, :duplicates_ok) do
+    param_name = param_to_string(param_name)
+
     params =
       request.params
       |> Map.update(param_name, [value], fn existing ->
@@ -199,6 +351,8 @@ defmodule HTTPlaster.Request do
   end
 
   def put_param(request, param_name, value, :prefer_existing) do
+    param_name = param_to_string(param_name)
+
     params =
       request.params
       |> Map.put_new(param_name, [value])
@@ -206,6 +360,19 @@ defmodule HTTPlaster.Request do
     %__MODULE__{request | params: params}
   end
 
+  # Ensures the param name is a string
+  @spec param_to_string(String.t | atom) :: String.t
+  defp param_to_string(a) when is_atom(a) do
+    Atom.to_string(a)
+  end
+
+  defp param_to_string(s) when is_binary(s) do
+    s
+  end
+
+  @doc """
+  Sets an "Authorization" header with the appropriate value for Basic authentication.
+  """
   @spec put_authentication_basic(t, String.t, String.t) :: t
   def put_authentication_basic(request, username, password) do
     credentials =
@@ -215,11 +382,21 @@ defmodule HTTPlaster.Request do
     put_header(request, "Authorization", "Basic #{credentials}", :replace_existing)
   end
 
+  @doc """
+  Sets the request body
+
+  The body can be any valid type detailed in the `body` type.
+  """
   @spec put_body(t, body) :: t
   def put_body(request, body) do
     %__MODULE__{request | body: body}
   end
 
+  @doc """
+  Combines the given URL with the query params
+
+  If the URL is `nil`, this will return an `{:error, NilURLError}`
+  """
   @spec prepare_url(url, params) :: {:ok, String.t} | {:error, Exception.t}
   def prepare_url(nil, _) do
     error = NilURLError.exception([])
@@ -237,21 +414,54 @@ defmodule HTTPlaster.Request do
     {:ok, append_params(base_url, p)}
   end
 
+  # Helper function to append the query params string
+  # to the URL, returning the URL itself if the query params
+  # string is empty
   @spec append_params(url, String.t | params) :: String.t
-  defp append_params(url, ""), do: url
-  defp append_params(url, params), do: "#{url}?#{params}"
+  defp append_params(url, "") do
+    url
+  end
 
+  defp append_params(url, params) do
+    "#{url}?#{params}"
+  end
+
+  @doc """
+  Encodes the body using `encode_body/1`, if `defer_body_processing` is `true`,
+  otherwise returns the body as-is.
+  """
   @spec prepare_body(body, boolean) :: {:ok, String.t | body} | {:error, Exception.t}
   def prepare_body(body, defer_body_processing)
-  def prepare_body(body, true), do: {:ok, body}
-  def prepare_body(body, false), do: encode_body(body)
 
+  def prepare_body(body, true) do
+    {:ok, body}
+  end
+
+  def prepare_body(body, false) do
+    encode_body(body)
+  end
+
+  @doc """
+  Encodes the body to a string. Accepts special forms of tuples as described
+  by `body_encoding`.
+
+  Due to the special forms this function supports, it can encounter a wide array
+  of error. If you call this function, make sure to match on the return value.
+  """
   @spec encode_body(body) :: {:ok, String.t} | {:error, Exception.t}
   def encode_body(body)
 
-  def encode_body(body) when is_binary(body), do: {:ok, body}
-  def encode_body(nil), do: {:ok, ""}
-  def encode_body({:form, form_data}), do: {:ok, URI.encode_query(form_data)}
+  def encode_body(body) when is_binary(body) do
+    {:ok, body}
+  end
+
+  def encode_body(nil) do
+    {:ok, ""}
+  end
+
+  def encode_body({:form, form_data}) do
+    {:ok, URI.encode_query(form_data)}
+  end
 
   def encode_body({:file, filepath}) do
     case File.read(filepath) do
