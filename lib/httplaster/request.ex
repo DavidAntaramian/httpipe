@@ -19,6 +19,10 @@ defmodule HTTPlaster.Request do
   allows for non-standard methods to be passed as atoms, and it is advantageous
   for adapters to support these non-standard methods should clients need to connect
   to servers that use them.
+
+  That being said, not all adapters will support non-standard methods. For example,
+  the :httpc module which is distributed with Erlang does not support anything outside
+  the "standard" method plus "TRACE".
   """
   @type http_method :: :get | :post | :put | :delete | :head | :options | :patch | atom
 
