@@ -1,27 +1,27 @@
-defmodule HTTPlaster.ConnTest do
+defmodule HTTPipe.ConnTest do
   use ExUnit.Case, async: true
 
-  alias HTTPlaster.{Conn, Request}
-  alias HTTPlaster.Adapters.UnimplementedError
-  alias HTTPlaster.Request.NilURLError
+  alias HTTPipe.{Conn, Request}
+  alias HTTPipe.Adapters.UnimplementedError
+  alias HTTPipe.Request.NilURLError
 
   alias Plug.Conn, as: Server
 
   setup tags do
-    default_adapter = Application.get_env(:httplaster, :adapter)
+    default_adapter = Application.get_env(:httpipe, :adapter)
 
     if tags[:httpc_adapter] do
-      Application.put_env(:httplaster, :adapter, HTTPlaster.Adapters.HTTPC)
+      Application.put_env(:httpipe, :adapter, HTTPipe.Adapters.HTTPC)
     end
 
     on_exit(fn ->
-      Application.put_env(:httplaster, :adapter, default_adapter)
+      Application.put_env(:httpipe, :adapter, default_adapter)
     end)
 
     :ok
   end
 
-  describe "HTTPlaster.Conn.clear_req_headers/1" do
+  describe "HTTPipe.Conn.clear_req_headers/1" do
     test "clears request headers" do
       conn =
         %Conn{request: %Request{headers: %{"accept": "application/json"}}}
@@ -49,7 +49,7 @@ defmodule HTTPlaster.ConnTest do
     end
   end
 
-  describe "HTTPlaster.Conn.defer_body_processing" do
+  describe "HTTPipe.Conn.defer_body_processing" do
     test "by default will set defer to true" do
       conn =
         Conn.new()
@@ -67,16 +67,16 @@ defmodule HTTPlaster.ConnTest do
     end
   end
 
-  describe "HTTPlaster.Conn.execute/1" do
+  describe "HTTPipe.Conn.execute/1" do
     test "defers body processing" do
-      req_body = {:json, %{"project" => %{"name" => "HTTPlaster"}}}
+      req_body = {:json, %{"project" => %{"name" => "HTTPipe"}}}
 
       defmodule TestAdapter do
         @moduledoc false
-        @behaviour HTTPlaster.Adapter
+        @behaviour HTTPipe.Adapter
 
         def execute_request(_, _, exec_body, _, _) do
-          assert exec_body == {:json, %{"project" => %{"name" => "HTTPlaster"}}}
+          assert exec_body == {:json, %{"project" => %{"name" => "HTTPipe"}}}
           {:ok, {204, %{}, ""}}
         end
       end
@@ -91,7 +91,7 @@ defmodule HTTPlaster.ConnTest do
     end
   end
 
-  describe "HTTPlaster.Conn.execute!/1" do
+  describe "HTTPipe.Conn.execute!/1" do
     test "raises UnimplementedError" do
       assert_raise UnimplementedError, fn ->
         Conn.new()
@@ -108,7 +108,7 @@ defmodule HTTPlaster.ConnTest do
     end
   end
 
-  describe "HTTPlaster.Conn.merge_req_headers/2" do
+  describe "HTTPipe.Conn.merge_req_headers/2" do
     @tag :httpc_adapter
     test "sends existing headers to server merged with new ones" do
       server = Bypass.open()
@@ -143,7 +143,7 @@ defmodule HTTPlaster.ConnTest do
     end
   end
 
-  describe "HTTPlaster.Conn.new/0" do
+  describe "HTTPipe.Conn.new/0" do
     test "returns a new Conn struct" do
       conn = Conn.new()
 
@@ -151,7 +151,7 @@ defmodule HTTPlaster.ConnTest do
     end
   end
 
-  describe "HTTPlaster.Conn.put_adapter/2" do
+  describe "HTTPipe.Conn.put_adapter/2" do
     test "changes the adapter used" do
       conn =
         Conn.new()
@@ -161,17 +161,17 @@ defmodule HTTPlaster.ConnTest do
     end
   end
 
-  describe "HTTPlaster.Conn.put_adapter_options/2" do
+  describe "HTTPipe.Conn.put_adapter_options/2" do
     test "adds adapter option" do
       conn =
         Conn.new()
-        |> Conn.put_adapter_options([pool: :httplaster])
+        |> Conn.put_adapter_options([pool: :httpipe])
 
-      assert {:pool, :httplaster} in conn.adapter_options
+      assert {:pool, :httpipe} in conn.adapter_options
     end
   end
 
-  describe "HTTPlaster.Conn.put_req_authentication_basic/3" do
+  describe "HTTPipe.Conn.put_req_authentication_basic/3" do
     @tag :httpc_adapter
     test "encodes authorization header" do
       server = Bypass.open()
@@ -209,7 +209,7 @@ defmodule HTTPlaster.ConnTest do
     end
   end
 
-  describe "HTTPlaster.Conn.put_req_body/2" do
+  describe "HTTPipe.Conn.put_req_body/2" do
     @tag :httpc_adapter
     test "puts the request body" do
       server = Bypass.open()
@@ -258,7 +258,7 @@ defmodule HTTPlaster.ConnTest do
     end
   end
 
-  describe "HTTPlaster.Conn.put_req_header/4" do
+  describe "HTTPipe.Conn.put_req_header/4" do
     @tag :httpc_adapter
     test "with default duplication option will flatten values" do
       server = Bypass.open()
@@ -336,7 +336,7 @@ defmodule HTTPlaster.ConnTest do
     end
   end
 
-  describe "HTTPlaster.Conn.put_req_method/2" do
+  describe "HTTPipe.Conn.put_req_method/2" do
     @tag :httpc_adapter
     test "sends GET method to server" do
       server = Bypass.open()
@@ -372,7 +372,7 @@ defmodule HTTPlaster.ConnTest do
     end
   end
 
-  describe "HTTPlaster.Conn.put_req_param/4" do
+  describe "HTTPipe.Conn.put_req_param/4" do
     @tag :httpc_adapter
     test "with default duplication option will replace existing params" do
       server = Bypass.open()
@@ -450,7 +450,7 @@ defmodule HTTPlaster.ConnTest do
     end
   end
 
-  describe "HTTPlaster.Conn.put_req_url/2" do
+  describe "HTTPipe.Conn.put_req_url/2" do
     test "sets the URL of the request" do
       conn =
         %Conn{}

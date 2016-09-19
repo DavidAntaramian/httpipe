@@ -1,4 +1,4 @@
-defmodule HTTPlaster.Conn.AlreadyExecutedError do
+defmodule HTTPipe.Conn.AlreadyExecutedError do
   @moduledoc """
   This exception is raised when the Conn you are executing has already
   been executed.

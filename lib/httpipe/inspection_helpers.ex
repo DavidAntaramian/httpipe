@@ -1,9 +1,9 @@
-defmodule HTTPlaster.InspectionHelpers do
+defmodule HTTPipe.InspectionHelpers do
   @moduledoc """
   """
   import Inspect.Algebra
 
-  alias HTTPlaster.{Conn, Request, Response}
+  alias HTTPipe.{Conn, Request, Response}
 
   @doc """
   """

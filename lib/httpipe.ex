@@ -1,7 +1,7 @@
-defmodule HTTPlaster do
+defmodule HTTPipe do
   @moduledoc """
   Provides helper functions that allow for quick, one-off HTTP requests. To build
-  composable requests, see the `HTTPlaster.Conn` module.
+  composable requests, see the `HTTPipe.Conn` module.
 
   The functions in this module are designed to provide a (somewhat) parity interface
   with [HTTPoison](https://hex.pm/packages/httpoison) and
@@ -10,13 +10,13 @@ defmodule HTTPlaster do
   an HTTP GET request, it is as simple as:
 
   ~~~
-  {:ok, conn} = HTTPlaster.get("https://httpbin.org/get")
+  {:ok, conn} = HTTPipe.get("https://httpbin.org/get")
   ~~~
 
   _See the note about [configuring an adapter](README.html#configuring-an-adapter) in
   the README._
 
-  The `conn` that is captured in the above statement is an `HTTPlaster.Conn` struct. All
+  The `conn` that is captured in the above statement is an `HTTPipe.Conn` struct. All
   the functions in the module have a return signature of `{:ok, Conn.t} | {:error, Conn.t}`
   except for trailing bang (_e.g._, `get!`) functions which have a return signature of
   `Conn.t | no_return`–anything that would have resulted in an `{:error, Conn.t}` response
@@ -33,7 +33,7 @@ defmodule HTTPlaster do
   of the client under the `"origin"` key.
 
   ~~~
-  with {:ok, %{response: %{body: body}}} <- HTTPlaster.get("https://httpbin.org/get"),
+  with {:ok, %{response: %{body: body}}} <- HTTPipe.get("https://httpbin.org/get"),
        {:ok, decoded_body} <- Poison.decode(body),
     do: Map.get(decoded_body, "origin")
   ~~~
@@ -46,10 +46,10 @@ defmodule HTTPlaster do
   an empty map will be passed. For example, let's set the `"Accept"` header:
 
   ~~~
-  HTTPlaster.get("https://httpbin.org/get", %{"Accept" => "application/xml"})
+  HTTPipe.get("https://httpbin.org/get", %{"Accept" => "application/xml"})
   ~~~
 
-  For more information, see the type documentation for `HTTPlaster.Request.headers`.
+  For more information, see the type documentation for `HTTPipe.Request.headers`.
 
   ## Body
 
@@ -60,18 +60,18 @@ defmodule HTTPlaster do
   one level deep.
 
   ~~~
-  post_body = {:form, [name: "HTTPlaster", language: "Elixir"]}
+  post_body = {:form, [name: "HTTPipe", language: "Elixir"]}
 
-  HTTPlaster.post("https://httpbin.org/post", post_body)
+  HTTPipe.post("https://httpbin.org/post", post_body)
   ~~~
 
   Based on the above connection, the server will receive the following body:
 
   ~~~txt
-  name=HTTPlaster&language=Elixir
+  name=HTTPipe&language=Elixir
   ~~~
 
-  For more information, see the type documentation for `HTTPlaster.Request.body`.
+  For more information, see the type documentation for `HTTPipe.Request.body`.
 
   ## Options
 
@@ -83,12 +83,12 @@ defmodule HTTPlaster do
   You can use this key to modify the adapter used for a specific connection. For example:
 
   ~~~
-  httpc_adapter = HTTPlaster.Adapters.HTTPC
+  httpc_adapter = HTTPipe.Adapters.HTTPC
 
   # Uses :default adapter
-  {:ok, conn} = HTTPlaster.get("https://httpbin.org/get", %{})
+  {:ok, conn} = HTTPipe.get("https://httpbin.org/get", %{})
   # Uses HTTPC Adapter
-  {:ok, conn} = HTTPlaster.get("https://httpbin.org/get", %{}, [adapter: httpc_adapter])
+  {:ok, conn} = HTTPipe.get("https://httpbin.org/get", %{}, [adapter: httpc_adapter])
   ~~~
 
   ### :adapter_options
@@ -103,15 +103,15 @@ defmodule HTTPlaster do
   to provide compatiability with HTTPoison/HTTPotion. For example:
 
   ~~~
-  params = [q: "HTTPlaster adapter", language: "elixir"]
+  params = [q: "HTTPipe adapter", language: "elixir"]
 
-  {:ok, conn} = HTTPlaster.get("https://httpbin.org/get", %{}, [params: params])
+  {:ok, conn} = HTTPipe.get("https://httpbin.org/get", %{}, [params: params])
   ~~~
 
   The server will receive the following URL request:
 
   ~~~txt
-  https://httpbin.org/get?q=HTTPlaster+adapter&language=elixir
+  https://httpbin.org/get?q=HTTPipe+adapter&language=elixir
   ~~~
 
   ## Further Testing
@@ -126,11 +126,11 @@ defmodule HTTPlaster do
   post_body = {:form, [test_param: "test value"]}
   headers = %{"content-type" => "application/x-www-form-urlencoded"}
 
-  HTTPlaster.post(url, post_body, headers)
+  HTTPipe.post(url, post_body, headers)
   ~~~
   """
 
-  alias HTTPlaster.{Conn, Request}
+  alias HTTPipe.{Conn, Request}
 
   @doc ~S"""
   Performs an HTTP `DELETE` request on the given resource.

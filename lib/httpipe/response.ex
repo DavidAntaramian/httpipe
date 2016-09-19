@@ -1,9 +1,9 @@
-defmodule HTTPlaster.Response do
+defmodule HTTPipe.Response do
   @moduledoc """
   An HTTP response from a server.
   """
 
-  alias HTTPlaster.InspectionHelpers
+  alias HTTPipe.InspectionHelpers
 
   @typedoc """
   The status code returned by the server.
@@ -65,9 +65,9 @@ defmodule HTTPlaster.Response do
   implemented using the `Inspect` protocol. However, the presentation used
   here can get extremely intrusive when experimenting using IEx, so it's
   relegated to this function. Corresponding functions can be found at
-  `HTTPlaster.Conn.inspect/2` and `HTTPlaster.Request.inspect/2`.
+  `HTTPipe.Conn.inspect/2` and `HTTPipe.Request.inspect/2`.
 
-  See `HTTPlaster.InspectionHelpers` for more information
+  See `HTTPipe.InspectionHelpers` for more information
   """
   @spec inspect(t, Keyword.t) :: t
   def inspect(resp, opts \\ []) do

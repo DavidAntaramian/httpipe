@@ -1,9 +1,9 @@
-defmodule HTTPlaster.RequestTest do
+defmodule HTTPipe.RequestTest do
   use ExUnit.Case
 
-  alias HTTPlaster.Request
+  alias HTTPipe.Request
 
-  describe "HTTPlaster.Request.encode_body/1" do
+  describe "HTTPipe.Request.encode_body/1" do
     test "encodes nil" do
       assert Request.encode_body(nil) == {:ok, ""}
     end
@@ -29,7 +29,7 @@ defmodule HTTPlaster.RequestTest do
     end
   end
 
-  describe "HTTPlaster.Request.prepare_body/2" do
+  describe "HTTPipe.Request.prepare_body/2" do
     test "returns unencoded body when processing is deferred" do
       assert Request.prepare_body(nil, true) == {:ok, nil}
     end
@@ -39,7 +39,7 @@ defmodule HTTPlaster.RequestTest do
     end
   end
 
-  describe "HTTPlaster.Request.prepare_url/2" do
+  describe "HTTPipe.Request.prepare_url/2" do
     test "returns prepared url with no params" do
       url = "https://google.com/"
 
@@ -72,7 +72,7 @@ defmodule HTTPlaster.RequestTest do
     end
   end
 
-  describe "HTTPlaster.Request.put_authentication_basic/3" do
+  describe "HTTPipe.Request.put_authentication_basic/3" do
     test "sets Authorization header" do
       expected_value = "Basic dXNlcm5hbWU6cGFzc3dvcmQ="
 
@@ -84,7 +84,7 @@ defmodule HTTPlaster.RequestTest do
     end
   end
 
-  describe "HTTPlaster.Request.put_header/4" do
+  describe "HTTPipe.Request.put_header/4" do
     test "with default duplication option will flatten values" do
       request =
         %Request{}
@@ -122,7 +122,7 @@ defmodule HTTPlaster.RequestTest do
     end
   end
 
-  describe "HTTPlaster.Request.clear_headers/1" do
+  describe "HTTPipe.Request.clear_headers/1" do
     test "clears existing headers" do
       request =
         %Request{headers: %{"accept-encoding" => "br"}}
@@ -133,7 +133,7 @@ defmodule HTTPlaster.RequestTest do
     end
   end
 
-  describe "HTTPlaster.Request.merge_headers/2" do
+  describe "HTTPipe.Request.merge_headers/2" do
     test "puts the headers into the struct" do
       headers = %{
         "Accept-Encoding" => "gzip, deflate",
@@ -164,7 +164,7 @@ defmodule HTTPlaster.RequestTest do
     end
   end
 
-  describe "HTTPlaster.Request.put_method/2" do
+  describe "HTTPipe.Request.put_method/2" do
     test "puts the method in the struct" do
       request =
         %Request{}
@@ -182,7 +182,7 @@ defmodule HTTPlaster.RequestTest do
     end
   end
 
-  describe "HTTPlaster.Request.put_param/4" do
+  describe "HTTPipe.Request.put_param/4" do
     test "with default duplication option will replace existing params" do
       request =
         %Request{params: %{"q" => ["plataformatec Elixir"], "tbas" => [0]}}
@@ -216,7 +216,7 @@ defmodule HTTPlaster.RequestTest do
     end
   end
 
-  describe "HTTPlaster.Request.put_url/2" do
+  describe "HTTPipe.Request.put_url/2" do
     test "puts the URL in the struct" do
       request =
         %Request{}

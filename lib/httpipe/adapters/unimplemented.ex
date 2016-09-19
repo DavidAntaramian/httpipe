@@ -1,11 +1,11 @@
-defmodule HTTPlaster.Adapters.Unimplemented do
+defmodule HTTPipe.Adapters.Unimplemented do
   @moduledoc """
   """
 
-  @behaviour HTTPlaster.Adapter
+  @behaviour HTTPipe.Adapter
 
-  alias HTTPlaster.{Request, Adapter}
-  alias HTTPlaster.Adapters.UnimplementedError
+  alias HTTPipe.{Request, Adapter}
+  alias HTTPipe.Adapters.UnimplementedError
 
   @spec execute_request(Request.http_method, Request.url, Request.body, Request.headers, Adapter.options) ::
     Adapter.success | Adapter.failure

@@ -1,4 +1,4 @@
-defmodule HTTPlaster.Request.NilURLError do
+defmodule HTTPipe.Request.NilURLError do
   @moduledoc """
   Error raised when the URL for a request is `nil`
   """

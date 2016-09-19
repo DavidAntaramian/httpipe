@@ -1,4 +1,4 @@
-defmodule HTTPlaster.Conn do
+defmodule HTTPipe.Conn do
   @moduledoc """
   An HTTP connection encapsulating the request and response, taking inspiration
   from the [Plug](https://hex.pm/packages/plug) package.
@@ -10,7 +10,7 @@ defmodule HTTPlaster.Conn do
   # not imported inside this module and should be called fully-qualified
   import Kernel, except: [inspect: 1]
 
-  alias HTTPlaster.{Adapter, Request, Response, InspectionHelpers}
+  alias HTTPipe.{Adapter, Request, Response, InspectionHelpers}
   alias __MODULE__.{AlreadyExecutedError}
 
   @typedoc """
@@ -60,13 +60,13 @@ defmodule HTTPlaster.Conn do
 
   #### :request
 
-  The request to be execute (see `HTTPlaster.Request`).
+  The request to be execute (see `HTTPipe.Request`).
 
   #### :response
 
   By default this will be `nil` until the connection is
   executed without failure. Then it will contain the response
-  from the host (see `HTTPlaster.Response`).
+  from the host (see `HTTPipe.Response`).
 
   #### :options
 
@@ -77,7 +77,7 @@ defmodule HTTPlaster.Conn do
 
   The adapter to be used for this connection. By default, this
   will be `:default`, meaning it will use the value stored
-  in the Application environment for `:httplaster` under the
+  in the Application environment for `:httpipe` under the
   key `:adapter`. This allows you to configure the default
   adapter globally.
 
@@ -104,7 +104,7 @@ defmodule HTTPlaster.Conn do
   #### :defer_body_processing
 
   When false (default), the request's body value will be encoded to a string
-  value by HTTPlaster.
+  value by HTTPipe.
 
   When true, the request's body value will be sent to the adapter
   as-is.
@@ -138,7 +138,7 @@ defmodule HTTPlaster.Conn do
   Executes a connection
 
   Executing a connection is the process of actually sending the request to the designated
-  host and receiving a response. A new `HTTPlaster.Conn` struct will be returned with the
+  host and receiving a response. A new `HTTPipe.Conn` struct will be returned with the
   response and a `:status` of `:executed`. If an error was encountered, the `:status` will
   instead be `:failed` and the error will be available under `:error`.
 
@@ -156,7 +156,7 @@ defmodule HTTPlaster.Conn do
 
   __Note__: A connection can only be executed _once_. Attempting to execute a connection
   again will change the `:status` to `:failed` with an error of the type
-  `HTTPlaster.Conn.AlreadyExecutedError`.
+  `HTTPipe.Conn.AlreadyExecutedError`.
 
   ## Examples
 
@@ -251,7 +251,7 @@ defmodule HTTPlaster.Conn do
   @doc """
   Sets the request method
 
-  See `HTTPlaster.Request.put_method/2` and `HTTPlaster.Request.http_method`
+  See `HTTPipe.Request.put_method/2` and `HTTPipe.Request.http_method`
   for more information.
   """
   @spec put_req_method(t, Request.http_method) :: t
@@ -300,7 +300,7 @@ defmodule HTTPlaster.Conn do
   https://api.everyoneapi.com/v1/phone/+5555555678?account_sid=abc123&auth_token=321cba
   ~~~
   
-  See `HTTPlaster.Request.put_url/2` for more information.
+  See `HTTPipe.Request.put_url/2` for more information.
   """
   @spec put_req_url(t, String.t) :: t
   def put_req_url(%__MODULE__{request: request} = conn, url) do
@@ -328,19 +328,19 @@ defmodule HTTPlaster.Conn do
   ~~~
   conn =
     Conn.new()
-    |> Conn.add_req_body({:form, [name: "HTTPlaster", language: "Elixir"]})
+    |> Conn.add_req_body({:form, [name: "HTTPipe", language: "Elixir"]})
   ~~~
 
   which will be encoded before sending to the server as the following:
 
   ~~~txt
-  name=HTTPlaster&language=Elixir
+  name=HTTPipe&language=Elixir
   ~~~
 
-  Note that HTTPlaster does not currently attempt to do any content type
+  Note that HTTPipe does not currently attempt to do any content type
   recognition. You are responsible for setting the `Content-Type` header
   appropriately based on the type of body you are sending.
-  See `HTTPlaster.Request.put_body/2` and `HTTPlaster.Request.body` for more
+  See `HTTPipe.Request.put_body/2` and `HTTPipe.Request.body` for more
   information. Also see `defer_body_processing/2`.
   """
   @spec put_req_body(t, Request.body) :: t
@@ -373,9 +373,9 @@ defmodule HTTPlaster.Conn do
 
   By default, if you have already set a header, setting it again with this function
   will append the new value to the old value using a comma to separate them. You
-  can pass a `HTTPlaster.Request.duplicate_options` atom as the final parameter
-  to change this. See `HTTPlaster.Request.put_header/4` and
-  `HTTPlaster.Request.headers` for more information.
+  can pass a `HTTPipe.Request.duplicate_options` atom as the final parameter
+  to change this. See `HTTPipe.Request.put_header/4` and
+  `HTTPipe.Request.headers` for more information.
   """
   @spec put_req_header(t, String.t, String.t, Request.duplicate_options) :: t
   def put_req_header(%__MODULE__{request: request} = conn, header_name, header_value, duplication_option \\ :duplicates_ok) do
@@ -402,7 +402,7 @@ defmodule HTTPlaster.Conn do
   Note that even if you clear the request headers, certain request headers
   will be set out of necessity when the connection is executed.
 
-  See `HTTPlaster.Request.clear_headers/1` for more information.
+  See `HTTPipe.Request.clear_headers/1` for more information.
   """
   @spec clear_req_headers(t) :: t
   def clear_req_headers(%__MODULE__{request: request} = conn) do
@@ -442,7 +442,7 @@ defmodule HTTPlaster.Conn do
   This function will replace any existing headers with the same name (regardless
   of casing).
 
-  See `HTTPlaster.Request.merge_headers/2` for more information.
+  See `HTTPipe.Request.merge_headers/2` for more information.
   """
   @spec merge_req_headers(t, Request.headers) :: t
   def merge_req_headers(%__MODULE__{request: request} = conn, headers) do
@@ -465,7 +465,7 @@ defmodule HTTPlaster.Conn do
 
   _This will replace any existing authentication header._
 
-  See `HTTPlaster.Request.put_authentication_basic/3` for more information.
+  See `HTTPipe.Request.put_authentication_basic/3` for more information.
   """
   @spec put_req_authentication_basic(t, String.t, String.t) :: t
   def put_req_authentication_basic(%__MODULE__{request: request} = conn, username, password) do
@@ -482,18 +482,18 @@ defmodule HTTPlaster.Conn do
   conn =
     Conn.new()
     |> Conn.put_req_url("https://google.com/#")
-    |> Conn.put_req_param(:q, "httplaster elixir")
+    |> Conn.put_req_param(:q, "httpipe elixir")
   ~~~
 
   will generate the following URL when the connection is executed:
 
   ~~~txt
-  https://google.com/#?q=httplaster+elixir
+  https://google.com/#?q=httpipe+elixir
   ~~~
 
   By default, if you have already set a parameter, setting it again with this function will
   overwrite the old value. You can pass a `Request.duplicate_options` atom as the final parameter
-  to change this. See `HTTPlaster.Request.put_param/4` for more information.
+  to change this. See `HTTPipe.Request.put_param/4` for more information.
   """
   @spec put_req_param(t, String.t, String.t, Request.duplicate_options) :: t
   def put_req_param(%__MODULE__{request: request} = conn, param_name, value, duplication_option \\ :replace_existing) do
@@ -502,10 +502,10 @@ defmodule HTTPlaster.Conn do
   end
 
   # Retrieves the adapter which should be a module that implements
-  # the HTTPlaster.Adapter behaviour
+  # the HTTPipe.Adapter behaviour
   @spec get_adapter(:default | module) :: module
   defp get_adapter(:default) do
-    Application.get_env(:httplaster, :adapter, HTTPlaster.Adapters.Unimplemented)
+    Application.get_env(:httpipe, :adapter, HTTPipe.Adapters.Unimplemented)
   end
 
   defp get_adapter(adapter) do
@@ -524,7 +524,7 @@ defmodule HTTPlaster.Conn do
   ~~~
   conn =
     Conn.new()
-    |> Conn.put_adapter(HTTPlaster.Adapters.Hackney)
+    |> Conn.put_adapter(HTTPipe.Adapters.Hackney)
   ~~~
   """
   @spec put_adapter(t, :default | module) :: t
@@ -542,36 +542,36 @@ defmodule HTTPlaster.Conn do
   ~~~
   conn =
     Conn.new()
-    |> Conn.add_req_body({:form, [name: "HTTPlaster", language: "Elixir"]})
+    |> Conn.add_req_body({:form, [name: "HTTPipe", language: "Elixir"]})
   ~~~
 
   when `Conn.execute(conn)` is called, the adapter will receive the following value for
   the body:
 
   ~~~txt
-  name=HTTPlaster&language=Elixir
+  name=HTTPipe&language=Elixir
   ~~~
 
   This is not always what you want. Some adapters have special handling for body
   values.
-  If you would rather HTTPlaster not process the body like this, you can turn
+  If you would rather HTTPipe not process the body like this, you can turn
   deferment on (_i.e._, the body's processing is deferred to the adapter for handling):
 
   ~~~
   conn =
     Conn.new()
-    |> Conn.add_req_body({:form, [name: "HTTPlaster", language: "Elixir"]})
+    |> Conn.add_req_body({:form, [name: "HTTPipe", language: "Elixir"]})
     |> Conn.defer_body_processing()
   ~~~
 
   The adapter will now receive the body as you set it:
 
   ~~~
-  {:form, [name: "HTTPlaster", language: "Elixir"]}
+  {:form, [name: "HTTPipe", language: "Elixir"]}
   ~~~
 
   If you have previously turned deferment on, or you want to ensure that it is off,
-  you can pass `false` as the second argument to ensure that HTTPlaster processes
+  you can pass `false` as the second argument to ensure that HTTPipe processes
   the body.
   """
   @spec defer_body_processing(t, boolean) :: t
@@ -588,13 +588,13 @@ defmodule HTTPlaster.Conn do
   @spec defer_body_processing?(t) :: boolean
   defp defer_body_processing?(conn) do
     local_preference = conn.options.defer_body_processing
-    general_preference = Application.get_env(:httplaster, :defer_body_processing, false)
+    general_preference = Application.get_env(:httpipe, :defer_body_processing, false)
 
     local_preference || general_preference
   end
 
   @doc """
-  Returns a new `HTTPlaster.Conn` struct
+  Returns a new `HTTPipe.Conn` struct
 
   This is currently the same as `%Conn{}`, but it provides a convenience function for those
   who prefer instantiating in this manner.
@@ -613,9 +613,9 @@ defmodule HTTPlaster.Conn do
   implemented using the `Inspect` protocol. However, the presentation used
   here can get extremely intrusive when experimenting using IEx, so it's
   relegated to this function. Corresponding functions can be found at
-  `HTTPlaster.Request.inspect/2` and `HTTPlaster.Response.inspect/2`.
+  `HTTPipe.Request.inspect/2` and `HTTPipe.Response.inspect/2`.
 
-  See `HTTPlaster.InspectionHelpers` for more information
+  See `HTTPipe.InspectionHelpers` for more information
   """
   @spec inspect(t, Keyword.t) :: t
   def inspect(conn, opts \\ []) do

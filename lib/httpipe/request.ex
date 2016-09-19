@@ -1,21 +1,21 @@
-defmodule HTTPlaster.Request do
+defmodule HTTPipe.Request do
   @moduledoc ~S"""
   An HTTP request that will be sent to the server
 
-  Note: The functions in this module will typically take an `HTTPlaster.Request` struct
+  Note: The functions in this module will typically take an `HTTPipe.Request` struct
   as their first parameter and return an updated struct. Under most circumstances,
-  you will want to use the functions defined in `HTTPlaster.Conn` which take `Conn`
+  you will want to use the functions defined in `HTTPipe.Conn` which take `Conn`
   structs and update internal `Request` structs.
   """
 
-  alias HTTPlaster.InspectionHelpers
+  alias HTTPipe.InspectionHelpers
   alias __MODULE__.{NilURLError}
 
   @typedoc """
   A specifier for the HTTP method
 
   The standard `GET`, `POST`, `PUT`, `DELETE`, `HEAD`, `OPTIONS`, and `PATCH` methods
-  should always be supported by HTTPlaster adapters. The specification also
+  should always be supported by HTTPipe adapters. The specification also
   allows for non-standard methods to be passed as atoms, and it is advantageous
   for adapters to support these non-standard methods should clients need to connect
   to servers that use them.
@@ -29,7 +29,7 @@ defmodule HTTPlaster.Request do
   @typedoc ~S"""
   Specifies a version of HTTP to use. The version should be specified as a `String.t`.
 
-  Currently, HTTPlaster only knows how to support HTTP 1.1 transactions, however,
+  Currently, HTTPipe only knows how to support HTTP 1.1 transactions, however,
   HTTP 2 is a future possibility.
   """
   @type http_version :: String.t
@@ -104,7 +104,7 @@ defmodule HTTPlaster.Request do
 
   ~~~
   %{
-    "q" => ["Elixir HTTPlaster"],
+    "q" => ["Elixir HTTPipe"],
     "tbas" => [0, 1]
   }
   ~~~
@@ -112,7 +112,7 @@ defmodule HTTPlaster.Request do
   will be encoded as:
 
   ~~~txt
-  q=Elixir+HTTPlaster&tbas=0&tbas=1
+  q=Elixir+HTTPipe&tbas=0&tbas=1
   ~~~
 
   Unlike headers, query parameters are stored in the case they are provided
@@ -199,7 +199,7 @@ defmodule HTTPlaster.Request do
   list. This is the default behavior. For example,
 
   ~~~
-  %HTTPlaster.Request{}
+  %HTTPipe.Request{}
   |> Request.put_header("Accept-Encoding", "gzip")
   |> Request.put_header("Accept-Encoding", "deflate")
   ~~~
@@ -316,13 +316,13 @@ defmodule HTTPlaster.Request do
   ~~~
   %Request{}
   |> Request.put_url("https://google.com/#")
-  |> Request.put_param(:q, "httplaster elixir")
+  |> Request.put_param(:q, "httpipe elixir")
   ~~~
 
   will generate the following URL when the connection is executed:
 
   ~~~txt
-  https://google.com/#?q=httplaster+elixir
+  https://google.com/#?q=httpipe+elixir
   ~~~
   """
   @spec put_param(t, String.t | atom, String.t, duplicate_options) :: t
@@ -500,9 +500,9 @@ defmodule HTTPlaster.Request do
   implemented using the `Inspect` protocol. However, the presentation used
   here can get extremely intrusive when experimenting using IEx, so it's
   relegated to this function. Corresponding functions can be found at
-  `HTTPlaster.Conn.inspect/2` and `HTTPlaster.Response.inspect/2`.
+  `HTTPipe.Conn.inspect/2` and `HTTPipe.Response.inspect/2`.
 
-  See `HTTPlaster.InspectionHelpers` for more information
+  See `HTTPipe.InspectionHelpers` for more information
   """
   @spec inspect(t, Keyword.t) :: t
   def inspect(req, opts \\ []) do

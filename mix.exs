@@ -1,18 +1,18 @@
-defmodule HTTPlaster.Mixfile do
+defmodule HTTPipe.Mixfile do
   use Mix.Project
 
   @project_description """
-  HTTPlaster is an adapter-driven HTTP library for Elixir that provides a way
+  HTTPipe is an adapter-driven HTTP library for Elixir that provides a way
   to build composable HTTP requests.
   """
 
-  @source_url "https://github.com/davidantaramian/httplaster"
+  @source_url "https://github.com/davidantaramian/httpipe"
   @version "0.0.1"
 
   def project do
     [
-      app: :httplaster,
-      name: "HTTPlaster",
+      app: :httpipe,
+      name: "HTTPipe",
       version: @version,
       elixir: "~> 1.3",
       elixirc_paths: elixirc_paths(Mix.env),
@@ -38,7 +38,7 @@ defmodule HTTPlaster.Mixfile do
 
   def application() do
     [
-      env: [httplaster: [adapter: HTTPlaster.Adapters.Unimplemented]],
+      env: [httpipe: [adapter: HTTPipe.Adapters.Unimplemented]],
       applications: apps(Mix.env)
     ]
   end
@@ -54,7 +54,7 @@ defmodule HTTPlaster.Mixfile do
   defp docs() do
     [
       source_ref: "v#{@version}",
-      main: "HTTPlaster",
+      main: "HTTPipe",
       extras: [
         "README.md": [title: "README"]
       ]
@@ -63,13 +63,13 @@ defmodule HTTPlaster.Mixfile do
 
   defp package() do
     [
-      name: :httplaster,
+      name: :httpipe,
       files: ["lib", "mix.exs", "README*", "LICENSE*"],
       maintainers: ["David Antaramian"],
       licenses: ["ISC"],
       links: %{
         "GitHub" => @source_url,
-        "Documentation" => "https://hexdocs.pm/httplaster/readme.html"
+        "Documentation" => "https://hexdocs.pm/httpipe/readme.html"
       }
     ]
   end

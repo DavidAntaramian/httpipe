@@ -1,4 +1,4 @@
-defmodule HTTPlaster.Adapters.HTTPC do
+defmodule HTTPipe.Adapters.HTTPC do
   @moduledoc """
   An :httpc client based largely on the HTTPClient for Phoenix testing
 
@@ -6,7 +6,7 @@ defmodule HTTPlaster.Adapters.HTTPC do
   https://github.com/phoenixframework/phoenix/blob/069028a/test/support/http_client.exs
   but changed to reflect the expectations of the behaviour
   """
-  @behaviour HTTPlaster.Adapter
+  @behaviour HTTPipe.Adapter
 
   alias __MODULE__.{ConnectionFailedError, SendFailedError, GeneralError}
 
