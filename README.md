@@ -134,8 +134,11 @@ doesn't have *composable HTTP requests*.
 ### Tesla
 
 [Tesla](https://hex.pm/packages/tesla) is a recent package that provides an adapter-driven
-HTTP library, but its attempts to use macros to build API wrappers doesn't feel right
-in Elixir.
+HTTP library that is very focused on helping you build API consumers quickly. It takes a
+different approach by providing a generic middleware scheme based on the Plug `plug`
+architecture. While it could use some improvement to the documentation, Tesla can quickly
+scaffold out an API client. The difference with Tesla comes down to whether you prefer
+the middleware architecture over HTTPipe's composability.
 
 ### hackney
 
