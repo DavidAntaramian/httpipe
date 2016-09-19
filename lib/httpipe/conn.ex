@@ -3,7 +3,7 @@ defmodule HTTPipe.Conn do
   An HTTP connection encapsulating the request and response, taking inspiration
   from the [Plug](https://hex.pm/packages/plug) package.
 
-
+  This module provides a way to easily compose an HTTP request.
   """
 
   # inspect/1 and Kernel.inspect/1 conflict, so Kernel.inspect/1 is
@@ -384,6 +384,34 @@ defmodule HTTPipe.Conn do
   end
 
   @doc """
+  Deletes the specified request header
+
+  ## Examples
+  
+  The following connection composition:
+
+  ~~~
+  conn =
+    Conn.new()
+    |> Conn.put_req_header("Accept-Encoding", "gzip")
+    |> Conn.put_req_header("Accept-Encoding", "deflate")
+    |> Conn.put_req_header("Content-Type", "application/json")
+    |> Conn.delete_req_header("Accept-Encoding")
+  ~~~
+
+  will result in the following headers:
+
+  ~~~txt
+  content-type: application/json
+  ~~~
+  """
+  @spec delete_req_header(t, String.t) :: t
+  def delete_req_header(%__MODULE__{request: request} = conn, header_name) do
+    new_request = Request.delete_header(request, header_name)
+    %__MODULE__{conn | request: new_request}
+  end
+
+  @doc """
   Clears the existing request headers
 
   ## Example
@@ -499,6 +527,41 @@ defmodule HTTPipe.Conn do
   def put_req_param(%__MODULE__{request: request} = conn, param_name, value, duplication_option \\ :replace_existing) do
     new_request = Request.put_param(request, param_name, value, duplication_option)
     %__MODULE__{conn | request: new_request}
+  end
+
+  @doc """
+  Deletes the named query parameter
+
+  ## Example
+  
+  ~~~
+  conn =
+    Conn.new()
+    |> Conn.put_req_url("https://google.com/#")
+    |> Conn.put_req_param(:q, "httpipe elixir")
+    |> Conn.put_req_param(:tbas, "0")
+    |> Conn.delete_req_param(:q)
+  ~~~
+
+  will generate the following URL when the connection is executed:
+
+  ~~~txt
+  https://google.com/#?q=httpipe+elixir
+  ~~~
+  """
+  @spec delete_req_param(t, String.t | atom) :: t
+  def delete_req_param(%__MODULE__{request: request} = conn, param_name) do
+    new_request = Request.delete_param(request, param_name)
+    %__MODULE__{conn | request: new_request}
+  end
+
+  @doc """
+  Returns the value of the response header, returning the default value
+  if the header does not exist
+  """
+  @spec get_resp_header(t, String.t, any) :: String.t | any
+  def get_resp_header(%__MODULE__{response: r}, header, default \\ nil) do
+    Response.get_header(r, header, default)
   end
 
   # Retrieves the adapter which should be a module that implements

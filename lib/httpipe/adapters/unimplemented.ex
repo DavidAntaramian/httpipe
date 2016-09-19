@@ -1,5 +1,10 @@
 defmodule HTTPipe.Adapters.Unimplemented do
   @moduledoc """
+  Special adapter that does nothing but return an error.
+
+  This adapter is the default adapter that ships with HTTPipe
+  and is completely useless except to show the general structure
+  of an adapter.
   """
 
   @behaviour HTTPipe.Adapter

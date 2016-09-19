@@ -56,6 +56,16 @@ defmodule HTTPipe.Response do
             body: nil,
             headers: %{}
 
+
+  @doc """
+  Returns the value of the requested header, returning the default value
+  if the header does not exist
+  """
+  @spec get_header(t, String.t, any) :: String.t | any
+  def get_header(response, header_name, default \\ nil) do
+    Map.get(response.headers, header_name, default)
+  end
+
   @doc """
   Inspects the structure of the Response struct passed in the same
   way `IO.inspect/1` might, returning the Response struct so that it

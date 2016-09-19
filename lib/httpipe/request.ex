@@ -250,6 +250,20 @@ defmodule HTTPipe.Request do
   end
 
   @doc """
+  Deletes the named header
+  """
+  @spec delete_header(t, String.t) :: t
+  def delete_header(request, header_name) do
+    header_name = String.downcase(header_name)
+
+    headers =
+      request.headers
+      |> Map.delete(header_name)
+
+    %__MODULE__{request | headers: headers}
+  end
+
+  @doc """
   Clears the existing request headers
 
   This will reset the internal store of request headers to an empty map.
@@ -356,6 +370,20 @@ defmodule HTTPipe.Request do
     params =
       request.params
       |> Map.put_new(param_name, [value])
+
+    %__MODULE__{request | params: params}
+  end
+
+  @doc """
+  Deletes a query string parameter
+  """
+  @spec delete_param(t, String.t | atom) :: t
+  def delete_param(request, param_name) do
+    param_name = param_to_string(param_name)
+
+    params =
+      request.params
+      |> Map.delete(param_name)
 
     %__MODULE__{request | params: params}
   end

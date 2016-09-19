@@ -1,7 +1,7 @@
 defmodule HTTPipe.ConnTest do
   use ExUnit.Case, async: true
 
-  alias HTTPipe.{Conn, Request}
+  alias HTTPipe.{Conn, Request, Response}
   alias HTTPipe.Adapters.UnimplementedError
   alias HTTPipe.Request.NilURLError
 
@@ -336,6 +336,30 @@ defmodule HTTPipe.ConnTest do
     end
   end
 
+  describe "HTTPipe.Conn.delete_req_header/2" do
+    @tag :httpc_adapter
+    test "deletes the header" do
+      server = Bypass.open()
+      url = "http://localhost:#{server.port}/"
+
+      Bypass.expect(server, fn server_conn ->
+        header_names = Enum.map(server_conn.req_headers, fn {name, _} -> name end)
+
+        refute "accept-encoding" in header_names
+
+        Server.send_resp(server_conn, 204, "")
+      end)
+
+      headers = %{"accept-encoding" => "gzip"}
+
+      {:ok, _client_conn} =
+        %Conn{request: %Request{headers: headers}}
+        |> Conn.put_req_url(url)
+        |> Conn.delete_req_header("Accept-Encoding")
+        |> Conn.execute()
+    end
+  end
+
   describe "HTTPipe.Conn.put_req_method/2" do
     @tag :httpc_adapter
     test "sends GET method to server" do
@@ -447,6 +471,78 @@ defmodule HTTPipe.ConnTest do
         |> Conn.put_req_url(url)
         |> Conn.put_req_param(:tbas, 1, :replace_existing)
         |> Conn.execute()
+    end
+  end
+
+  describe "HTTPipe.Conn.delete_req_param/2" do
+    @tag :httpc_adapter
+    test "deletes the name parameter (string)" do
+      server = Bypass.open()
+      url = "http://localhost:#{server.port}/"
+
+      Bypass.expect(server, fn server_conn ->
+        assert server_conn.query_string == "q=plataformatec+Elixir"
+        Server.send_resp(server_conn, 204, "")
+      end)
+
+      params = %{"q" => ["plataformatec Elixir"], "tbas" => [0]}
+
+      {:ok, _client_conn} =
+        %Conn{request: %Request{params: params}}
+        |> Conn.put_req_url(url)
+        |> Conn.delete_req_param("tbas")
+        |> Conn.execute()
+    end
+
+    @tag :httpc_adapter
+    test "deletes the name parameter (atom)" do
+      server = Bypass.open()
+      url = "http://localhost:#{server.port}/"
+
+      Bypass.expect(server, fn server_conn ->
+        assert server_conn.query_string == "q=plataformatec+Elixir"
+        Server.send_resp(server_conn, 204, "")
+      end)
+
+      params = %{"q" => ["plataformatec Elixir"], "tbas" => [0]}
+
+      {:ok, _client_conn} =
+        %Conn{request: %Request{params: params}}
+        |> Conn.put_req_url(url)
+        |> Conn.delete_req_param(:tbas)
+        |> Conn.execute()
+    end
+  end
+
+  describe "HTTPipe.Conn.get_resp_header/3" do
+    test "returns the value of the header" do
+      headers = %{"content-type" => "test/html"}
+      response = %Response{headers: headers}
+      conn = %Conn{response: response}
+
+      value = Conn.get_resp_header(conn, "content-type")
+
+      assert value == "test/html"
+    end
+
+    test "returns the nil when the header does not exist" do
+      headers = %{}
+      response = %Response{headers: headers}
+      conn = %Conn{response: response}
+
+      value = Conn.get_resp_header(conn, "content-type")
+
+      assert value == nil
+    end
+    
+    test "returns the specified default value when the header does not exist" do
+      headers = %{}
+      response = %Response{headers: headers}
+      conn = %Conn{response: response}
+
+      value = Conn.get_resp_header(conn, "content-type", "text/html")
+
+      assert value == "text/html"
     end
   end
 

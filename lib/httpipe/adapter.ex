@@ -7,24 +7,31 @@ defmodule HTTPipe.Adapter do
   alias HTTPipe.Response
 
   @typedoc ~S"""
-
+  Signature for a successful response from the adapter
   """
   @type success :: {:ok, response}
 
   @typedoc ~S"""
+  Signature for a failed response from the adapter
   """
   @type failure :: {:error, exception}
 
   @typedoc ~S"""
+  When an adapter fails, it must respond with a valid exception that can
+  be raised
   """
   @type exception :: Exception.t
 
   @typedoc ~S"""
+  The adapter must return the status code, the headers, and the body
+  for the response
   """
   @type response :: {Response.status_code, Response.headers, Response.body}
 
   @typedoc ~S"""
-
+  The adapter may take certain options that will be passed as the final
+  parameter as a Keyword list. The adapter documentation should list the
+  possible options and their usage.
   """
   @type options :: Keyword.t
 

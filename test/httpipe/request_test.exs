@@ -122,6 +122,16 @@ defmodule HTTPipe.RequestTest do
     end
   end
 
+  describe "HTTPipe.Request.delete_header/2" do
+    test "deletes the header" do
+      request =
+        %Request{headers: %{"accept-encoding" => "gzip"}}
+        |> Request.delete_header("Accept-Encoding")
+
+      refute {"accept-encoding", "gzip"} in request.headers
+    end
+  end
+
   describe "HTTPipe.Request.clear_headers/1" do
     test "clears existing headers" do
       request =
@@ -213,6 +223,24 @@ defmodule HTTPipe.RequestTest do
         |> Request.put_param(:tbas, 1, :replace_existing)
 
       assert {"tbas", [1]} in request.params
+    end
+  end
+
+  describe "HTTPipe.Request.delete_param/2" do
+    test "deletes the named parameter (string)" do
+      request =
+        %Request{params: %{"q" => ["plataformatec Elixir"], "tbas" => [0]}}
+        |> Request.delete_param("tbas")
+
+      refute {"tbas", [0]} in request.params
+    end
+
+    test "deletes the named parameter (atom)" do
+      request =
+        %Request{params: %{"q" => ["plataformatec Elixir"], "tbas" => [0]}}
+        |> Request.delete_param(:tbas)
+
+      refute {"tbas", [0]} in request.params
     end
   end
 
