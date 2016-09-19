@@ -1,6 +1,18 @@
 defmodule HTTPipe.InspectionHelpers do
   @moduledoc """
+  Helper module for formatting `HTTPipe.Conn`, `HTTPipe.Request`, and `HTTPipe.Response`
+  structs.
+
+  This module offers a way to nicely report the state of `Conn`, `Request`, and `Response`
+  structs using standard `Inspect.Algebra` documents, however the result is far too intrusive
+  to be used as the default protocol implementation. Therefore, each module has an individual
+  `inspect/2` function that can be called which will display the output:
+
+    - `HTTPipe.Conn.inspect/2`
+    - `HTTPipe.Request.inspect/2`
+    - `HTTPipe.Response.inspect/2`
   """
+
   import Inspect.Algebra
 
   alias HTTPipe.{Conn, Request, Response}
@@ -56,7 +68,7 @@ defmodule HTTPipe.InspectionHelpers do
     ]
   end
 
-  @spec inspect_request(Request.t, Inspect.Opts.t) :: Inspect.Algebra.t
+  @spec inspect_request(nil | Request.t, Inspect.Opts.t) :: Inspect.Algebra.t
   def inspect_request(request, opts) do
     headers = inspect_headers(request.headers)
     http_version = inspect_http_version(request.http_version, opts)
@@ -79,6 +91,10 @@ defmodule HTTPipe.InspectionHelpers do
   end
 
   @spec inspect_response(Response.t, Inspect.Opts.t) :: Inspect.Algebra.t
+  def inspect_response(nil, _opts) do
+    empty()
+  end
+
   def inspect_response(response, opts) do
     status_code = inspect_status_code(response.status_code, opts)
     headers = inspect_headers(response.headers)
