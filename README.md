@@ -1,4 +1,4 @@
-# HTTPipe [![ISC License](https://img.shields.io/badge/license-ISC-ff69b4.svg)](LICENSE)
+# HTTPipe [![ISC License](https://img.shields.io/badge/license-ISC-ff69b4.svg)](LICENSE) [![Documentation](https://img.shields.io/badge/hexdocs-latest-blue.svg)](https://hexdocs.pm/httpipe/index.html)
 
 HTTPipe is an adapter-driven HTTP library for Elixir that provides a way
 to build composable HTTP requests.
@@ -167,4 +167,4 @@ For a list of improvements being considered, see the
 
 Copyright (c) 2016 David Antaramian
 
-Licensed under the [ISC License](LICENSE.md)
+Licensed under the [ISC License](LICENSE)

@@ -54,7 +54,7 @@ defmodule HTTPipe.Mixfile do
   defp docs() do
     [
       source_ref: "v#{@version}",
-      main: "HTTPipe",
+      main: "README",
       extras: [
         "README.md": [title: "README"]
       ]
