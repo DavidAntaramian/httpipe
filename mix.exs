@@ -54,7 +54,7 @@ defmodule HTTPipe.Mixfile do
   defp docs() do
     [
       source_ref: "v#{@version}",
-      main: "README",
+      main: "readme",
       extras: [
         "README.md": [title: "README"]
       ]
@@ -83,6 +83,7 @@ defmodule HTTPipe.Mixfile do
       {:dialyxir, "~> 0.3", only: [:dev, :test]},
       {:bypass, "~> 0.5", only: [:test]},
       {:credo, "~> 0.4", only: [:dev, :test]},
+      {:inch_ex, "~> 0.5", only: :test, override: true},
     ]
   end
 end

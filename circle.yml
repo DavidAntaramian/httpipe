@@ -22,3 +22,6 @@ dependencies:
 test:
   override:
     - mix test
+  post:
+    - mix inch.report
+    - mix coveralls.circle

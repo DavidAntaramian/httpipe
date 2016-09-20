@@ -1,4 +1,4 @@
-# HTTPipe [![ISC License](https://img.shields.io/badge/license-ISC-ff69b4.svg)](LICENSE) [![Documentation](https://img.shields.io/badge/hexdocs-latest-blue.svg)](https://hexdocs.pm/httpipe/index.html)
+# HTTPipe [![ISC License](https://img.shields.io/badge/license-ISC-ff69b4.svg)](LICENSE) [![Hex.pm](https://img.shields.io/hexpm/v/httpipe.svg?maxAge=2592000?style=plastic)](https://hex.pm/packages/httpipe) [![Documentation](https://img.shields.io/badge/hexdocs-latest-blue.svg)](https://hexdocs.pm/httpipe/index.html) [![Inline docs](http://inch-ci.org/github/davidantaramian/httpipe.svg)](http://inch-ci.org/github/davidantaramian/httpipe) [![CircleCI branch](https://img.shields.io/circleci/project/DavidAntaramian/httpipe/master.svg?maxAge=2592000?style=plastic)](https://circleci.com/gh/DavidAntaramian/httpipe/tree/master) [![Coverage Status](https://coveralls.io/repos/github/DavidAntaramian/httpipe/badge.svg?branch=master)](https://coveralls.io/github/DavidAntaramian/httpipe?branch=master)
 
 HTTPipe is an adapter-driven HTTP library for Elixir that provides a way
 to build composable HTTP requests.
