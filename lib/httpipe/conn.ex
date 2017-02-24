@@ -690,4 +690,15 @@ defmodule HTTPipe.Conn do
 
     conn
   end
+
+
+  @doc """
+  Converts the Conn struct's request into a valid curl string that
+  can be called from the command-line.
+  """
+  @spec to_curl(t) :: String.t
+  def to_curl(conn) do
+    conn.request
+    |> Request.to_curl()
+  end
 end
