@@ -8,7 +8,7 @@ defmodule HTTPipe.Request do
   structs and update internal `Request` structs.
   """
 
-  alias HTTPipe.InspectionHelpers
+  alias HTTPipe.{CurlHelpers, InspectionHelpers}
   alias __MODULE__.{NilURLError}
 
   @typedoc """
@@ -34,7 +34,7 @@ defmodule HTTPipe.Request do
   """
   @type http_version :: String.t
 
-  @typdoc ~S"""
+  @typedoc ~S"""
   Specifies a resource to access
 
   The URL should include the scheme, domain, and request path.
@@ -541,5 +541,14 @@ defmodule HTTPipe.Request do
     |> IO.puts()
 
     req
+  end
+
+  @doc """
+  Converts the Request struct into a valid curl string that
+  can be called from the command-line.
+  """
+  @spec to_curl(t) :: String.t
+  def to_curl(request) do
+    CurlHelpers.convert_request_to_curl(request)
   end
 end

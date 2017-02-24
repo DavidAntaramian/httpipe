@@ -77,6 +77,7 @@ defmodule HTTPipe.InspectionHelpers do
     full_url = inspect_full_url(request.url, request.params, opts)
     params = inspect_params(request.params, opts)
     body = inspect_body(request.body, opts)
+    curl_string = inspect_curl_string(request, opts)
 
     concat [
       format_section_head("Request"),
@@ -86,7 +87,8 @@ defmodule HTTPipe.InspectionHelpers do
       full_url,
       headers,
       params,
-      body
+      body,
+      curl_string
     ]
   end
 
@@ -209,6 +211,14 @@ defmodule HTTPipe.InspectionHelpers do
            line(existing_doc, inspect_header(k, v))
        end)
     |> format_nested_with_header("Headers")
+  end
+
+  @spec inspect_curl_string(Request.t, Inspect.Opts.t) :: Inspect.Algebra.t
+  def inspect_curl_string(request, opts) do
+    request
+    |> Request.to_curl()
+    |> to_doc(opts)
+    |> format_nested_with_header("Curl String")
   end
 
   @spec inspect_status_code(Response.status_code, Inspect.Opts.t) :: Inspect.Algebra.t
