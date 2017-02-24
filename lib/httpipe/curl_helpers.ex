@@ -26,8 +26,10 @@ defmodule HTTPipe.CurlHelpers do
 
   @spec convert_full_url(Request.url, Request.params) :: String.t
   def convert_full_url(base_url, params) do
-    {:ok, full_url} = Request.prepare_url(base_url, params)
-    full_url
+    case Request.prepare_url(base_url, params) do
+      {:ok, full_url} -> full_url
+      {:error, _} -> ""
+    end
   end
 
   @spec convert_method(Request.method) :: String.t
