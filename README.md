@@ -26,7 +26,7 @@ it in the `mix.exs` of a project like so:
 def deps do
   [
     {:httpipe_adapters_hackney, "~> 0.9"},
-    {:httpipe, "~> 0.9}
+    {:httpipe, "~> 0.9"}
   ]
 end
 ```
